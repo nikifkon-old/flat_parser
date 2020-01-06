@@ -1,5 +1,12 @@
 .vscode/
 venv/
 
+data.*
+*.txt
+*.log
+!requiremnts.txt
+
 *.pyc
 __pycache__/
+
+.bs4_parser/
