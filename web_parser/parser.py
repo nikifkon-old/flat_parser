@@ -1,7 +1,7 @@
 import os
 import signal
 from random import choice
-from multiprocessing import Pool
+from concurrent.futures import ThreadPoolExecutor
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
 
@@ -91,13 +91,12 @@ class Task():
 
     def run(self):
         self.status = "running"
-        with Pool(os.cpu_count(), initializer=pool_initializer) as pool:
+        with ThreadPoolExecutor(os.cpu_count()) as executor:
             try:
-                pool.map(self.get_data, self.urls)
+                executor.map(self.get_data, self.urls)
             except KeyboardInterrupt:
-                pool.terminate()
-                pool.join()
                 self.close_all()
+                executor.shutdown()
 
     def get_data(self, url):
         driver, _ = self.open_driver()
@@ -111,7 +110,6 @@ class Task():
             print(exc)
         finally:
             self.close_driver(driver)
-
 
     def __repr__(self):
         return "<%s: name=%s, status=%s>" % (self.__class__.__name__, self.name, self.status)

@@ -5,6 +5,7 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import NoSuchElementException
 from web_parser.parser import Task, TaskManager
 
 URL = "https://www.avito.ru/ekaterinburg/kvartiry/prodam/vtorichka"
@@ -12,7 +13,8 @@ URL = "https://www.avito.ru/ekaterinburg/kvartiry/prodam/vtorichka"
 
 class GettingPageUrlList(Task):
     """ Get list of items urls for parse """
-    scroll_sleep_time = 0.5
+    scroll_sleep_time = 0.5 # 0.3
+    load_more_button_label = "Загрузить еще"
     file_path = 'links.txt'
 
     def __init__(self, *args, **kwargs):
@@ -21,15 +23,20 @@ class GettingPageUrlList(Task):
         super().__init__(*args, driver_options=options, **kwargs)
 
     def prepare(self, driver):
-        # TODO: also click load more button
         last = driver.execute_script("return document.body.scrollHeight")
         new = None
-        while last != new:
+        load_more_button = None
+        while last != new or load_more_button:
+            try:
+                load_more_button = driver.find_element_by_xpath("//div[.='%s']//span"
+                                                                % self.load_more_button_label)
+                load_more_button.click()
+            except NoSuchElementException:
+                load_more_button = None
             last = new
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
             sleep(self.scroll_sleep_time)
             new = driver.execute_script("return document.body.scrollHeight")
-            assert new is not None
 
     def parse(self, driver):
         container = driver.find_element_by_xpath(".//*[@data-marker='items/list']")
@@ -122,7 +129,7 @@ def main():
     manager.add_task(parse_item_task)
 
     manager.run_by_name("parse_url")
-    print(f"Time: {round(time() - start_time)} sec.")
+    print(f"Time: {round(time() - start_time, 2)} sec.")
 
 
 if __name__ == '__main__':
