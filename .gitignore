@@ -4,6 +4,7 @@ venv/
 data.*
 *.txt
 *.log
+*.json
 !requiremnts.txt
 
 *.pyc

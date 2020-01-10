@@ -1,21 +1,21 @@
+import re
+import os
 import json
 from time import sleep, time
+from concurrent.futures import ProcessPoolExecutor
 from selenium import webdriver
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
 from web_parser.parser import Task, TaskManager
 
-URL = "https://www.avito.ru/ekaterinburg/kvartiry/prodam/vtorichka"
+URL = "https://m.avito.ru/ekaterinburg/kvartiry/prodam/vtorichka"
 
 
-class GettingPageUrlList(Task):
+class GettingFlatInfo(Task):
     """ Get list of items urls for parse """
-    scroll_sleep_time = 0.5 # 0.3
+    scroll_sleep_time = 0.4
     load_more_button_label = "Загрузить еще"
-    file_path = 'links.txt'
+    file_path = 'flat_info.json'
+    debug_file = "flat_info_debug.log"
 
     def __init__(self, *args, **kwargs):
         options = webdriver.ChromeOptions()
@@ -39,15 +39,51 @@ class GettingPageUrlList(Task):
             new = driver.execute_script("return document.body.scrollHeight")
 
     def parse(self, driver):
+        result = []
         container = driver.find_element_by_xpath(".//*[@data-marker='items/list']")
-        links_elements = container.find_elements_by_xpath("//*[@data-marker='item/link']")
-        links = [link.get_property("href") for link in links_elements]
-        return links
+        items = container.find_elements_by_xpath(".//*[@data-marker='item/link']")
+        items_text = [item.text for item in items]
+        with ProcessPoolExecutor(os.cpu_count()) as executor:
+            result = executor.map(self.parse_item, items_text)
+        return list(result)
+
+    def parse_item(self, item):
+        price_mo = re.compile(r'(\d+ )+руб.')
+        total_area_mo = re.compile(r'\d+(\.)?\d м²')
+        floor_mo = re.compile(r'(?P<floor>\d+)\/\d+ эт.')
+
+        street_name = r'((\d{1,3}(\s|-)){0,1}\w+\s?){1,3}'
+        street_types = r'(бульвар|б-р|ул|улица|пер|ш|пр-т|nул|пр-кт)\.?'
+        address_mo = re.compile(r'((%s\s?%s)|(%s\s?%s)), \d+\w?'
+                                % (street_types, street_name, street_name, street_types))
+
+        price = re.search(price_mo, item).group()
+        total_area = re.search(total_area_mo, item).group()
+        floor = re.search(floor_mo, item).group('floor')
+
+        address = re.search(address_mo, item)
+        if address is None:
+            address = item.split('\n')[-2]
+            with open(self.debug_file, 'a', encoding='utf-8') as file:
+                file.write(f'Error while parsing item(address) is None): '\
+                           f'{repr(item)}\n')
+        else:
+            address = address.group()
+
+        row = {
+            "price": price,
+            "address": address,
+            "total_area": total_area,
+            "floor": floor
+        }
+        return row
 
     def save_data(self, data):
-        with open(self.file_path, 'w', encoding='utf-8') as file:
-            for link in data:
-                file.write(link + '\n')
+        with open(self.file_path, 'a', encoding='utf-8') as file:
+            for item in data:
+                if item is not None:
+                    json.dump(item, file, ensure_ascii=False, indent=4)
+                    file.write(',\n')
 
     def get_links(self):
         try:
@@ -58,77 +94,14 @@ class GettingPageUrlList(Task):
             return list()
 
 
-class GettingPageInfo(Task):
-    """ parse item """
-    total_area_label = "Общая площадь, м²"
-    house_type_label = "Тип дома"
-    address_label = "Адрес"
-    floor_label = "Этаж"
-    file_path = "data.json"
-
-    def __init__(self, *args, **kwargs):
-        capa = DesiredCapabilities.CHROME
-        capa['pageLoadStrategy'] = "none"
-        driver_kwargs = {
-            "desired_capabilities": capa
-        }
-
-        options = webdriver.ChromeOptions()
-        options.add_argument("headless")
-
-        super().__init__(*args, driver_options=options,
-                         driver_kwargs=driver_kwargs, **kwargs)
-
-    def prepare(self, driver):
-        wait = WebDriverWait(driver, 10)
-        wait.until(EC.presence_of_element_located(
-            (By.XPATH, "//*[@data-marker='item-properties/list']")))
-        driver.execute_script("window.stop();")
-
-    def parse(self, driver):
-        container = driver.find_element_by_xpath(".//*[@data-marker='item-container']")
-        price = container.find_element_by_xpath("//*[@data-marker='item-description/price']").text
-        prop_list = container.find_element_by_xpath("//*[@data-marker='item-properties/list']")
-
-        total_area = self.get_props_item_text(prop_list, self.total_area_label)
-        house_type = self.get_props_item_text(prop_list, self.house_type_label)
-        address = self.get_props_item_text(prop_list, self.address_label)
-        floor = self.get_props_item_text(prop_list, self.floor_label)
-
-        data = {
-            'price': price,
-            'address': address,
-            'total_area': total_area,
-            'house_type': house_type,
-            'floor': floor
-        }
-        return data
-
-    def get_props_item_text(self, prop_list, label):
-        item = prop_list.find_element_by_xpath(
-            "//*[.='%s']/../*[2]" % label
-        )
-        return item.text
-
-    def save_data(self, data):
-        with open(self.file_path, 'a', encoding='utf-8', newline="") as file:
-            json.dump(data, file, ensure_ascii=False, indent=4)
-            file.write(',\n')
-
-
 def main():
     start_time = time()
     manager = TaskManager()
-    getting_links_task = GettingPageUrlList("get_links", [URL])
+    getting_links_task = GettingFlatInfo("get_flat_info", [URL])
     manager.add_task(getting_links_task)
 
-    manager.run_by_name("get_links")
+    manager.run_by_name("get_flat_info")
 
-    items_links = getting_links_task.get_links()
-    parse_item_task = GettingPageInfo("parse_url", items_links)
-    manager.add_task(parse_item_task)
-
-    manager.run_by_name("parse_url")
     print(f"Time: {round(time() - start_time, 2)} sec.")
 
 
