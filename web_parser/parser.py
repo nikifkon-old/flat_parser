@@ -32,6 +32,7 @@ class Task():
     statuses = [
         'pending', 'running', 'successed', 'failed'
     ]
+    data = None
 
     def __init__(self, name, urls, driver_kwargs=None, driver_options=None):
         self.name = name
