@@ -1,7 +1,6 @@
 import os
 import signal
 from random import choice
-from concurrent.futures import ThreadPoolExecutor
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
 
@@ -34,9 +33,9 @@ class Task():
     ]
     data = None
 
-    def __init__(self, name, urls, driver_kwargs=None, driver_options=None):
+    def __init__(self, name, url, driver_kwargs=None, driver_options=None):
         self.name = name
-        self.urls = urls
+        self.url = url
         self._status = "pending"
 
         if driver_kwargs is not None:
@@ -91,46 +90,37 @@ class Task():
         raise NotImplementedError('save_data method must be overrided')
 
     def run(self):
-        self.status = "running"
-        with ThreadPoolExecutor(os.cpu_count()) as executor:
-            try:
-                executor.map(self.get_data, self.urls)
-            except KeyboardInterrupt:
-                self.close_all()
-                executor.shutdown()
-
-    def get_data(self, url):
         driver, _ = self.open_driver()
-        driver.get(url)
+        driver.get(self.url)
         try:
             self.prepare(driver)
             data = self.parse(driver)
             self.save_data(data)
         except WebDriverException as exc:
             self.status = "failed"
-            print(exc)
+            raise exc
         finally:
             self.close_driver(driver)
+        self.status = "running"
 
     def __repr__(self):
-        return "<%s: name=%s, status=%s>" % (self.__class__.__name__, self.name, self.status)
+        return "<%s: name=%s, url=%s, status=%s>" % (
+            self.__class__.__name__, self.name, self.url, self.status)
 
 
 class TaskManager():
     tasks = {}
 
-    def add_task(self, task):
-        self.tasks[task.name] = task
+    def create_task(self, task_class, url, name, *args, **kwargs):
+        task_label = f'{name} url: {url}'
+        task = task_class(name, url, *args, **kwargs)
+        self.tasks[task_label] = task
+        return task
 
-    def run_all(self):
-        for task in self.tasks.values():
-            task.run()
-
-    def run_by_name(self, name):
-        if name in self.tasks:
-            self.tasks[name].run()
-        else:
-            raise Exception('Task with name: `%s` does not exist' % name)
+    def create_tasks(self, task_class, urls, *args, **kwargs):
+        for url in urls:
+            task = self.create_task(task_class, url, *args, **kwargs)
+            yield task
 
     def __repr__(self):
         return "<%s>" % self.__class__.__name__

@@ -88,10 +88,10 @@ class GettingFlatInfo(Task):
             "total_area": total_area,
             "floor": floor
         }
-        house_info = self.get_house_info(address)
+        # house_info = self.get_house_info(address)
 
-        if house_info is not None:
-            row.update(house_info)
+        # if house_info is not None:
+        #     row.update(house_info)
         return row
 
     def get_house_info(self, address):
@@ -167,10 +167,8 @@ class GettingHouseInfo(Task):
 def main():
     start_time = time()
     manager = TaskManager()
-    getting_links_task = GettingFlatInfo("get_flat_info", [URL])
-    manager.add_task(getting_links_task)
-
-    manager.run_by_name("get_flat_info")
+    task = manager.create_task(GettingFlatInfo, URL, "getting_flat_info")
+    task.run()
 
     print(f"Time: {round(time() - start_time, 2)} sec.")
 
