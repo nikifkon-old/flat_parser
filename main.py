@@ -167,7 +167,7 @@ class GettingHouseInfo(Task):
 def main():
     start_time = time()
     manager = TaskManager()
-    task = manager.create_task(GettingFlatInfo, URL, "getting_flat_info")
+    task = manager.create_task(GettingFlatInfo, "getting_flat_info", URL)
     task.run()
 
     print(f"Time: {round(time() - start_time, 2)} sec.")

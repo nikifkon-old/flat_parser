@@ -111,15 +111,15 @@ class Task():
 class TaskManager():
     tasks = {}
 
-    def create_task(self, task_class, url, name, *args, **kwargs):
+    def create_task(self, task_class, name, url, *args, **kwargs):
         task_label = f'{name} url: {url}'
         task = task_class(name, url, *args, **kwargs)
         self.tasks[task_label] = task
         return task
 
-    def create_tasks(self, task_class, urls, *args, **kwargs):
+    def create_tasks(self, task_class, name, urls, *args, **kwargs):
         for url in urls:
-            task = self.create_task(task_class, url, *args, **kwargs)
+            task = self.create_task(task_class, name, url, *args, **kwargs)
             yield task
 
     def __repr__(self):
