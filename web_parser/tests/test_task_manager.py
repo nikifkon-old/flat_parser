@@ -1,26 +1,19 @@
 from collections.abc import Iterable
 
-from web_parser.parser import TaskManager
-from web_parser.tests.test_task import ExampleTask
 
+def test_create_task(manager, custom_task, task_data):
+    task_label = f"{task_data['name']} url: {task_data['url']}"
+    task = manager.create_task(custom_task, *task_data.values())
 
-def test_create_task():
-    name = 'test_name'
-    url = 'https://google.com'
-    task_label = f'{name} url: {url}'
-    manager = TaskManager()
-
-    task = manager.create_task(ExampleTask, url, name)
     assert manager.tasks[task_label] == task
-    assert task.name == name
-    assert task.url == url
+    assert task.name == task_data['name']
+    assert task.url == task_data['url']
 
-def test_create_tasks():
+def test_create_tasks(manager, custom_task):
     name = 'test_name'
     urls = ['https://google.com', 'https://gmail.com', 'https://yandex.ru']
-    manager = TaskManager()
 
-    tasks = manager.create_tasks(ExampleTask, urls, name)
+    tasks = manager.create_tasks(custom_task, name, urls)
 
     assert isinstance(tasks, Iterable)
     task_list = [t for t in tasks]
