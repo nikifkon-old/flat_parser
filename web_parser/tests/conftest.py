@@ -1,5 +1,5 @@
 import pytest
-from web_parser.parser import Task, TaskManager
+from avito_parser.web_parser.parser import Task, TaskManager
 
 
 @pytest.fixture

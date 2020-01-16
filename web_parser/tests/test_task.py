@@ -1,5 +1,5 @@
 import pytest
-from web_parser.parser import Task
+from avito_parser.web_parser.parser import Task
 
 
 def test_taks_init(task_data):

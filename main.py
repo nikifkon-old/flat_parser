@@ -9,7 +9,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
-from web_parser.parser import Task, TaskManager
+from avito_parser.web_parser.parser import Task, TaskManager
 
 URL = "https://m.avito.ru/ekaterinburg/kvartiry/prodam/vtorichka"
 HOUSE_INFO_URL = "https://domaekb.ru/search?adres="
