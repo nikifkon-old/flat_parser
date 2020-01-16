@@ -75,6 +75,10 @@ class Task():
             driver.quit()
             del driver
 
+    def presave_hook(self, data):
+        """ Hook for modify parsed data """
+        return data
+
     def prepare(self, driver):
         """ Abstract method called before `parse` wait for a loading
         """
@@ -95,7 +99,8 @@ class Task():
         try:
             self.prepare(driver)
             data = self.parse(driver)
-            self.save_data(data)
+            full_data = self.presave_hook(data)
+            self.save_data(full_data)
         except WebDriverException as exc:
             self.status = "failed"
             raise exc
