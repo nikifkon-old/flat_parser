@@ -2,12 +2,15 @@ import os
 import signal
 from random import choice
 from selenium import webdriver
-from selenium.common.exceptions import WebDriverException
 
 
 def pool_initializer():
     """Ignore CTRL+C in the worker process."""
     signal.signal(signal.SIGINT, signal.SIG_IGN)
+
+
+class StopTaskException(Exception):
+    pass
 
 
 class Driver(webdriver.Chrome):
@@ -94,19 +97,20 @@ class Task():
         raise NotImplementedError('save_data method must be overrided')
 
     def run(self):
+        self.status = "running"
         driver, _ = self.open_driver()
         driver.get(self.url)
         try:
             self.prepare(driver)
             data = self.parse(driver)
             full_data = self.presave_hook(data)
-            self.save_data(full_data)
-        except WebDriverException as exc:
+            returned_data = self.save_data(full_data)
+            self.status = "successed"
+            return returned_data
+        except StopTaskException:
             self.status = "failed"
-            raise exc
         finally:
             self.close_driver(driver)
-        self.status = "running"
 
     def __repr__(self):
         return "<%s: name=%s, url=%s, status=%s>" % (
