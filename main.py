@@ -1,6 +1,7 @@
 import re
 import os
 import json
+from datetime import datetime
 from time import sleep, time
 from concurrent.futures import ProcessPoolExecutor
 from selenium import webdriver
@@ -34,12 +35,12 @@ class GettingFlatInfo(Task):
         new = None
         load_more_button = None
         while last != new or load_more_button:
-            try:
-                load_more_button = driver.find_element_by_xpath("//div[.='%s']//span"
-                                                                % self.load_more_button_label)
-                load_more_button.click()
-            except NoSuchElementException:
-                load_more_button = None
+            # try:
+            #     load_more_button = driver.find_element_by_xpath("//div[.='%s']//span"
+            #                                                     % self.load_more_button_label)
+            #     load_more_button.click()
+            # except NoSuchElementException:
+            #     load_more_button = None
             last = new
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
             sleep(self.scroll_sleep_time)
@@ -179,12 +180,16 @@ class GettingHouseInfo(Task):
         items = []
         items.append(('build_year', f'Год постройки:{NBSP}'))
         items.append(('lift_count', f'Количество лифтов, ед.:{NBSP}'))
-        items.append(('general_area', f'Общая площадь помещений, входящих в состав общего имущества, кв.м:{NBSP}'))
+        items.append(('porch_count', f'Количество подъездов, ед.:{NBSP}'))
+        items.append(('people_count', f'Количество жителей:'))
+        items.append(('public_area', f'Общая площадь помещений, входящих в состав общего имущества, кв.м:{NBSP}'))
+        items.append(('land_area', f'Площадь земельного участка, входящего в состав общего имущества в многоквартирном доме, кв.м:{NBSP}'))
         items.append(('foundation_type', f'Тип фундамента:{NBSP}'))
-        items.append(('wall_material', f'Материал несущих стен:{NBSP}'))
+        items.append(('house_type', f'Материал несущих стен:{NBSP}'))
         items.append(('coating_type', f'Тип перекрытий:{NBSP}'))
         items.append(('house_area', f'Общая площадь МКД, кв.м:'))
-        items.append(('basement_area', f'Площадь подвала по полу, кв.м:{NBSP}'))
+        items.append(('playground', f'Элементы благоустройства (детская площадка):{NBSP}'))
+        items.append(('sport_ground', f'Элементы благоустройства (спортивная площадка):{NBSP}'))
 
         for name, label in items:
             data[name] = self.get_table_item(container, label)
@@ -201,6 +206,9 @@ class GettingHouseInfo(Task):
     def presave_hook(self, data):
         if self.prev_data:
             data.update(self.prev_data)
+        year = data.get('build_year')
+        if year is not None:
+            data['build_year'] = datetime.now().year - int(year)
         return data
 
     def save_data(self, data):

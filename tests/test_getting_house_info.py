@@ -4,13 +4,18 @@ from avito_parser.main import GettingHouseInfo
 def check_data(data):
     assert data
     assert data.get('build_year')
+    assert 0 <= data.get('build_year') < 300
     assert data.get('lift_count')
-    assert data.get('general_area')
+    assert data.get('public_area')
     assert data.get('foundation_type')
-    assert data.get('wall_material')
+    assert data.get('house_type')
     assert data.get('coating_type')
     assert data.get('house_area')
-    assert data.get('basement_area')
+    assert data.get('playground')
+    assert data.get('sport_ground')
+    data['land_area']
+    assert data.get('porch_count')
+    assert data.get('people_count')
 
 
 def test_classmethod(prev_data):
