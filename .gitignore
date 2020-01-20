@@ -5,6 +5,7 @@ data.*
 *.txt
 *.log
 *.json
+*.csv
 !requiremnts.txt
 
 *.pyc

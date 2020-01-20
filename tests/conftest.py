@@ -6,7 +6,7 @@ from avito_parser.main import GettingHouseInfo
 def prev_data():
     return [
         {'test': 'test', 'url': 'https://domaekb.ru/search?adres=%D0%A5%D1%80%D0%BE%D0%BC%D1%86%D0%BE%D0%B2%D1%81%D0%BA%D0%B0%D1%8F+%D1%83%D0%BB.%2C+1'},
-        {'test': 'test', 'url': 'https://gmail.com'},
+        {'test': 'test', 'url': 'https://domaekb.ru/search?adres=%D1%83%D0%BB.+%D0%9D%D0%B0%D1%87%D0%B4%D0%B8%D0%B2%D0%B0+%D0%9E%D0%BD%D1%83%D1%84%D1%80%D0%B8%D0%B5%D0%B2%D0%B0%2C+8'},
     ]
 
 
@@ -21,6 +21,7 @@ def urls_cases():
 
 class GettingHouseInfoLog(GettingHouseInfo):
     def save_data(self, data):
+        super().save_data(data)
         return data
 
 

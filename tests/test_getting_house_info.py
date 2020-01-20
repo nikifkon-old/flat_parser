@@ -1,4 +1,4 @@
-from avito_parser.main import GettingHouseInfo
+from avito_parser.tests.conftest import GettingHouseInfoLog
 
 
 def check_data(data):
@@ -19,11 +19,14 @@ def check_data(data):
 
 
 def test_classmethod(prev_data):
-    tasks = GettingHouseInfo.create_tasks_by_prev_data(prev_data)
+    tasks = GettingHouseInfoLog.create_tasks_by_prev_data(prev_data)
     assert len(tasks) == len(prev_data)
     i = 0
     task = tasks[i]
     assert task.prev_data == prev_data[i]
+
+    data = task.run()
+    assert set(task.prev_data).issubset(set(data))
 
 
 def test_ok(create_house_info_task):

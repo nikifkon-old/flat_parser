@@ -1,6 +1,6 @@
 import re
 import os
-import json
+import csv
 from datetime import datetime
 from time import sleep, time
 from concurrent.futures import ProcessPoolExecutor
@@ -130,7 +130,7 @@ class GettingFlatInfo(Task):
 class GettingHouseInfo(Task):
     debug_file = 'house_info_debug.log'
     warning_file = 'house_info_warning.log'
-    output_file = 'info.json'
+    output_file = 'info.csv'
 
     def __init__(self, *args, prev_data=None, **kwargs):
         self.prev_data = prev_data
@@ -218,9 +218,15 @@ class GettingHouseInfo(Task):
         return data
 
     def save_data(self, data):
+        need_header = False
+        if not os.path.exists(self.output_file):
+            need_header = True
         with open(self.output_file, 'a', encoding='utf-8') as file:
-            json.dump(data, file, ensure_ascii=False, indent=4)
-            file.write(',\n')
+            writer = csv.writer(file)
+            if need_header:
+                writer.writerow(data.keys())
+            writer.writerow(data.values())
+
     def log_error(self):
         with open(self.debug_file, 'a', encoding='utf-8') as file:
             file.write(f'Address not found in domaekb.ru {self.url}\n')
