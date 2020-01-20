@@ -60,30 +60,11 @@ class GettingFlatInfo(Task):
         total_area_mo = re.compile(r'\d+(\.)?\d м²')
         floor_mo = re.compile(r'(?P<floor>\d+)\/\d+ эт.')
 
-        street_name = r'((\d{1,3}(\s|-)){0,1}(?!км\b)\b\w+\s?){1,3}'
-        street_types = r'(бульвар|б-р|ул|улица|пер|ш|пр-т|nул|пр-кт)\.?'
-        house_number = r'\d+\/?(\s?\w?\.?\s?\d?)'
-        address_mo = re.compile(r'((%s\s?%s)|(%s\s?%s)),\s?%s'
-                                % (street_types,
-                                   street_name,
-                                   street_name,
-                                   street_types,
-                                   house_number))
-
         price = re.search(price_mo, item).group()
         total_area = re.search(total_area_mo, item).group()
         floor = re.search(floor_mo, item).group('floor')
 
-        address = re.search(address_mo, item)
-        if address is None:
-            address = item.split('\n')[-2]
-            with open(self.debug_file, 'a', encoding='utf-8') as file:
-                file.write(f'Error while parsing item(address) is None): '\
-                           f'{repr(item)}\n')
-        else:
-            address = address.group()
-            if '\n' in address:
-                address = address.split('\n')[0]
+        address = self.get_address(item)
 
         row = {
             "price": price,
@@ -93,11 +74,37 @@ class GettingFlatInfo(Task):
         }
         return self.with_house_info_url(row)
 
+    def get_address(self, item):
+        street_name = r'((\d{1,3}(\s|-)){0,1}(?!км\b)\b\w+\s?){1,3}'
+        street_types = r'(бульвар|б-р|ул|улица|пер|ш|пр-т|nул|пр-кт)\.?'
+        house_number = r'\d+\/?(\s?\w?\.?\s?\d?)'
+        address_mo = re.compile(r'((%s\s?%s)|(%s\s?%s)),\s?(?P<number>%s)'
+                                % (street_types,
+                                   street_name,
+                                   street_name,
+                                   street_types,
+                                   house_number))
+
+        address = re.search(address_mo, item)
+        if address is None:
+            address = item.split('\n')[-2]
+            # with open(self.debug_file, 'a', encoding='utf-8') as file:
+            #     file.write(f'Error while parsing item(address) is None): '\
+            #                f'{repr(item)}\n')
+        else:
+            number = address.group('number')
+            mod_number = number.replace('к', '/')
+            address = address.group().replace(number, mod_number)
+
+            if '\n' in address:
+                address = address.split('\n')[0]
+        normal_address = address.replace('проспект', 'пр-кт').replace('пр-т', 'пр-кт').replace('улица', 'ул')
+        return normal_address.strip()
+
     def with_house_info_url(self, row):
         address = row.get("address")
-        mod_address = self.modify_address(address)
-        if mod_address:
-            row['url'] = HOUSE_INFO_URL + mod_address
+        if address:
+            row['url'] = HOUSE_INFO_URL + address
         return row
 
     def get_house_info(self, address):
@@ -110,9 +117,6 @@ class GettingFlatInfo(Task):
         house_info_task = GettingHouseInfo("get_house_info", [url])
         house_info_task.run()
         return house_info_task.data
-
-    def modify_address(self, address):
-        return address
 
     def save_data(self, data):
         return data
@@ -155,6 +159,7 @@ class GettingHouseInfo(Task):
                 (By.XPATH, "//div[@class='region region-content']//table[2]//thead//th")
             ))
         except NoSuchElementException:
+            self.log_error()
             raise StopTaskException()
         driver.execute_script("window.stop();")
 
@@ -165,6 +170,7 @@ class GettingHouseInfo(Task):
             td = table.find_element_by_xpath(".//td[@class='views-field views-field-field-address'][1]")
             link = td.find_element_by_xpath("./a")
         except NoSuchElementException:
+            self.log_error()
             raise StopTaskException()
 
         link.click()
@@ -215,6 +221,13 @@ class GettingHouseInfo(Task):
         with open(self.output_file, 'a', encoding='utf-8') as file:
             json.dump(data, file, ensure_ascii=False, indent=4)
             file.write(',\n')
+    def log_error(self):
+        with open(self.debug_file, 'a', encoding='utf-8') as file:
+            file.write(f'Address not found in domaekb.ru {self.url}\n')
+
+
+def run_task(task):
+    task.run()
 
 
 def main():
@@ -224,8 +237,8 @@ def main():
     data = task.run()
 
     tasks = GettingHouseInfo.create_tasks_by_prev_data(data)
-    for task in tasks:
-        task.run()
+    with ProcessPoolExecutor(os.cpu_count()) as executor:
+        executor.map(run_task, tasks)
 
     print(f"Time: {round(time() - start_time, 2)} sec.")
 
