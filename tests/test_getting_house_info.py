@@ -16,6 +16,7 @@ def check_data(data):
     data['land_area']
     assert data.get('porch_count')
     assert data.get('people_count')
+    assert data.get('url') is None
 
 
 def test_classmethod(prev_data):
@@ -26,6 +27,7 @@ def test_classmethod(prev_data):
     assert task.prev_data == prev_data[i]
 
     data = task.run()
+    task.prev_data.pop('url')
     assert set(task.prev_data).issubset(set(data))
 
 

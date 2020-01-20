@@ -215,6 +215,8 @@ class GettingHouseInfo(Task):
         year = data.get('build_year')
         if year is not None:
             data['build_year'] = datetime.now().year - int(year)
+        if data.get('url'):
+            data.pop('url')
         return data
 
     def save_data(self, data):
