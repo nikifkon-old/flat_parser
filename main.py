@@ -59,11 +59,17 @@ class GettingFlatInfo(Task):
         price_mo = re.compile(r'(?P<price>(\d+ ?)+) руб.')
         total_area_mo = re.compile(r'(?P<area>\d+(\.)?\d) м²')
         floor_mo = re.compile(r'(?P<floor>\d+)\/(?P<floor_num>\d+) эт.')
+        metro_distance_mo = re.compile(r'(?P<distance>\d+(,\d+)?) км')
 
         price = re.search(price_mo, item).group('price')
         total_area = re.search(total_area_mo, item).group('area')
         floor = re.search(floor_mo, item).group('floor')
         floor_num = re.search(floor_mo, item).group('floor_num')
+
+        metro_distance = None
+        metro_distance_match = re.search(metro_distance_mo, item)
+        if metro_distance_match is not None:
+            metro_distance = metro_distance_match.group('distance')
 
         address = self.get_address(item)
 
@@ -73,6 +79,7 @@ class GettingFlatInfo(Task):
             "total_area": total_area,
             "floor": floor,
             "floor_num": floor_num,
+            "metro_distance": metro_distance
         }
         return self.with_house_info_url(row)
 
