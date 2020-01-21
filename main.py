@@ -1,5 +1,6 @@
 import re
 import os
+import sys
 import csv
 from datetime import datetime
 from time import sleep, time
@@ -13,12 +14,17 @@ from selenium.webdriver.support import expected_conditions as EC
 from avito_parser.web_parser.parser import Task, TaskManager, StopTaskException
 
 
-URL = "https://m.avito.ru/ekaterinburg/kvartiry/prodam/vtorichka"
+AVITO_URL = "https://m.avito.ru/ekaterinburg/kvartiry/prodam/vtorichka"
+JULA_URL = "https://youla.ru/ekaterinburg/nedvijimost/prodaja-kvartiri"
 HOUSE_INFO_URL = "https://domaekb.ru/search?adres="
 NBSP = " "
 
 
-class GettingFlatInfo(Task):
+class GettingJulaFlatInfo(Task):
+    pass
+
+
+class GettingAvitoFlatInfo(Task):
     """ Get list of items urls for parse """
     scroll_sleep_time = 0.4
     load_more_button_label = "Загрузить еще"
@@ -249,13 +255,23 @@ def run_task(task):
 
 def main():
     start_time = time()
-    manager = TaskManager()
-    task = manager.create_task(GettingFlatInfo, "getting_flat_info", URL)
-    data = task.run()
 
-    tasks = GettingHouseInfo.create_tasks_by_prev_data(data)
-    with ProcessPoolExecutor(os.cpu_count()) as executor:
-        executor.map(run_task, tasks)
+    if len(sys.argv) >= 2:
+        manager = TaskManager()
+        if sys.argv[1] == 'avito':
+            task = manager.create_task(GettingAvitoFlatInfo, "avito", AVITO_URL)
+        elif sys.argv[1] == 'jula':
+            task = manager.create_task(GettingJulaFlatInfo, "jula", JULA_URL)
+        else:
+            print(f'`{sys.argv[1]}` is not valid parser name')
+            sys.exit(1)
+        data = task.run()
+
+        tasks = GettingHouseInfo.create_tasks_by_prev_data(data)
+        with ProcessPoolExecutor(os.cpu_count()) as executor:
+            executor.map(run_task, tasks)
+    else:
+        print('Please pass parser name')
 
     print(f"Time: {round(time() - start_time, 2)} sec.")
 

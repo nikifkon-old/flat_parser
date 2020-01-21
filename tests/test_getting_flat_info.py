@@ -1,5 +1,5 @@
 import pytest
-from avito_parser.main import GettingFlatInfo
+from avito_parser.main import GettingAvitoFlatInfo
 
 
 @pytest.mark.parametrize('item_text, expected', [
@@ -59,5 +59,5 @@ from avito_parser.main import GettingFlatInfo
             'url': 'https://domaekb.ru/search?adres=пр-кт Академика Сахарова , 29'}],
 ])
 def test_get_address(item_text, expected):
-    task = GettingFlatInfo('test', 'url')
+    task = GettingAvitoFlatInfo('test', 'url')
     assert task.parse_item(item_text) == expected
