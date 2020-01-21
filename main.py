@@ -58,11 +58,12 @@ class GettingFlatInfo(Task):
     def parse_item(self, item):
         price_mo = re.compile(r'(?P<price>(\d+ ?)+) руб.')
         total_area_mo = re.compile(r'(?P<area>\d+(\.)?\d) м²')
-        floor_mo = re.compile(r'(?P<floor>\d+)\/\d+ эт.')
+        floor_mo = re.compile(r'(?P<floor>\d+)\/(?P<floor_num>\d+) эт.')
 
         price = re.search(price_mo, item).group('price')
         total_area = re.search(total_area_mo, item).group('area')
         floor = re.search(floor_mo, item).group('floor')
+        floor_num = re.search(floor_mo, item).group('floor_num')
 
         address = self.get_address(item)
 
@@ -70,7 +71,8 @@ class GettingFlatInfo(Task):
             "price": price,
             "address": address,
             "total_area": total_area,
-            "floor": floor
+            "floor": floor,
+            "floor_num": floor_num,
         }
         return self.with_house_info_url(row)
 
