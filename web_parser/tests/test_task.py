@@ -1,6 +1,6 @@
 import pytest
-from avito_parser.web_parser.parser import Task
-from avito_parser.web_parser.tests.conftest import ExampleTask
+from flat_parser.web_parser.parser import Task
+from flat_parser.web_parser.tests.conftest import ExampleTask
 
 
 def test_taks_init(task_data):

@@ -1,4 +1,4 @@
-from avito_parser.web_parser.parser import Task
+from flat_parser.web_parser.parser import Task
 
 
 class GettingJulaFlatInfo(Task):

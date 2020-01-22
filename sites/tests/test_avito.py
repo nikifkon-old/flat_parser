@@ -1,5 +1,5 @@
 import pytest
-from avito_parser.sites.avito import GettingAvitoFlatInfo
+from flat_parser.sites.avito import GettingAvitoFlatInfo
 
 
 @pytest.mark.parametrize('item_text, expected', [

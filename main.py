@@ -2,10 +2,10 @@ import os
 import sys
 from time import time
 from concurrent.futures import ProcessPoolExecutor
-from avito_parser.web_parser.parser import TaskManager
-from avito_parser.sites.avito import GettingAvitoFlatInfo
-from avito_parser.sites.domaekb import GettingHouseInfo
-from avito_parser.sites.jula import GettingJulaFlatInfo
+from flat_parser.web_parser.parser import TaskManager
+from flat_parser.sites.avito import GettingAvitoFlatInfo
+from flat_parser.sites.domaekb import GettingHouseInfo
+from flat_parser.sites.jula import GettingJulaFlatInfo
 
 
 AVITO_URL = "https://m.avito.ru/ekaterinburg/kvartiry/prodam/vtorichka"

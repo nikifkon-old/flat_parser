@@ -3,7 +3,7 @@ import os
 from time import sleep
 from concurrent.futures import ProcessPoolExecutor
 from selenium import webdriver
-from avito_parser.web_parser.parser import Task
+from flat_parser.web_parser.parser import Task
 
 
 HOUSE_INFO_URL = "https://domaekb.ru/search?adres="

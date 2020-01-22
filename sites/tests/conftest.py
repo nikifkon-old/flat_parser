@@ -1,5 +1,5 @@
 import pytest
-from avito_parser.sites.domaekb import GettingHouseInfo
+from flat_parser.sites.domaekb import GettingHouseInfo
 
 
 @pytest.fixture
