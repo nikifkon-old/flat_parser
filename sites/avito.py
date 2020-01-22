@@ -18,8 +18,11 @@ class GettingAvitoFlatInfo(Task):
 
     def __init__(self, *args, **kwargs):
         options = webdriver.ChromeOptions()
-        options.add_argument("headless")
-        super().__init__(*args, driver_options=options, **kwargs)
+        # options.add_argument("headless")
+        driver_kwargs = {
+            'mobile': True
+        }
+        super().__init__(*args, driver_options=options, driver_kwargs=driver_kwargs, **kwargs)
 
     def prepare(self, driver):
         last = driver.execute_script("return document.body.scrollHeight")

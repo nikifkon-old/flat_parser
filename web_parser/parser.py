@@ -14,13 +14,14 @@ class StopTaskException(Exception):
 
 
 class Driver(webdriver.Chrome):
-    def __init__(self, *args, options=None, **kwargs):
+    def __init__(self, *args, mobile=False, options=None, **kwargs):
         current_dir = os.path.dirname(os.path.abspath(__file__))
         self.useragent_list_path = os.path.join(current_dir, "mobile_useragents.txt")
 
         if options is None:
             options = webdriver.ChromeOptions()
-        options.add_argument("user-agent=%s" % self.get_random_useragent())
+        if mobile:
+            options.add_argument("user-agent=%s" % self.get_random_useragent())
         super().__init__(*args, options=options, **kwargs)
 
     def get_random_useragent(self):
