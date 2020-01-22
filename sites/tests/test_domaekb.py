@@ -1,4 +1,4 @@
-from avito_parser.tests.conftest import GettingHouseInfoLog
+from avito_parser.sites.tests.conftest import GettingHouseInfoLog
 
 
 def check_data(data):
