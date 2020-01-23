@@ -50,7 +50,7 @@ class GettingAvitoFlatInfo(Task):
         return result
 
     def parse_item(self, item):
-        price_mo = re.compile(r'(?P<price>(\d+ ?)+) руб.')
+        price_mo = re.compile(r'(?P<price>(\d+ ?)+).руб\.')
         total_area_mo = re.compile(r'(?P<area>\d+(\.)?\d) м²')
         floor_mo = re.compile(r'(?P<floor>\d+)\/(?P<floor_num>\d+) эт.')
         metro_distance_mo = re.compile(r'(?P<distance>\d+(,\d+)?) км')

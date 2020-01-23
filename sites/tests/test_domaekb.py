@@ -1,4 +1,7 @@
+from collections.abc import Iterator
+import pytest
 from flat_parser.sites.tests.conftest import GettingHouseInfoLog
+from flat_parser.sites.domaekb import HOUSE_INFO_URL
 
 
 def check_data(data):
@@ -29,6 +32,33 @@ def test_classmethod(prev_data):
     data = task.run()
     task.prev_data.pop('url')
     assert set(task.prev_data).issubset(set(data))
+
+
+def test_create_task_from_address():
+    address = 'пр Академика Сахарова , 2'
+    task = GettingHouseInfoLog.create_task_from_address(address)
+    assert task
+    assert HOUSE_INFO_URL in task.url
+
+
+def test_create_tasks_from_addresses():
+    addresses = ['пр Академика Сахарова , 2', 'пр Академика Сахарова , 2']
+    tasks = GettingHouseInfoLog.create_tasks_from_addresses(addresses)
+    assert tasks
+    assert isinstance(tasks, Iterator)
+    assert len(list(tasks)) == len(addresses)
+
+
+@pytest.mark.parametrize('address, expected', [
+    ('Первомайская улица., 79', 'Первомайская ул., 79'),
+    ('ул. Начдива Онуфриева, 24к2', 'ул. Начдива Онуфриева, 24/2'),
+    ('проспект Академика Сахарова , 2', 'пр-кт Академика Сахарова , 2'),
+    ('пр-т Академика Сахарова , 2', 'пр-кт Академика Сахарова , 2'),
+    ('пр Академика Сахарова , 2', 'пр-кт Академика Сахарова , 2')
+])
+def test_get_searchable_address(create_house_info_task, address, expected):
+    task = create_house_info_task("ok")
+    assert expected == task.get_searchable_address(address)
 
 
 def test_ok(create_house_info_task):

@@ -1,4 +1,5 @@
 import os
+import re
 import csv
 from datetime import datetime
 from selenium import webdriver
@@ -11,6 +12,7 @@ from flat_parser.web_parser.parser import Task, StopTaskException
 
 
 NBSP = " "
+HOUSE_INFO_URL = "https://domaekb.ru/search?adres="
 
 
 class GettingHouseInfo(Task):
@@ -29,6 +31,33 @@ class GettingHouseInfo(Task):
         options = webdriver.ChromeOptions()
         options.add_argument("headless")
         super().__init__(*args, driver_options=options, driver_kwargs=driver_kwargs, **kwargs)
+
+    @classmethod
+    def create_task_from_address(cls, address, *args, **kwargs):
+        name = "getting_house_info"
+        url = HOUSE_INFO_URL + cls.get_searchable_address(address)
+        return cls(name, url, *args, **kwargs)
+
+    @classmethod
+    def create_tasks_from_addresses(cls, addresses, *args, **kwargs):
+        name = "getting_house_info"
+        for address in addresses:
+            url = HOUSE_INFO_URL + cls.get_searchable_address(address)
+            yield cls(name, url, *args, **kwargs)
+
+    @staticmethod
+    def get_searchable_address(address):
+        address = re.sub('проспект', 'пр-кт', address)
+        address = re.sub('пр-т', 'пр-кт', address)
+        address = re.sub('пр ', 'пр-кт ', address)
+        address = re.sub('улица', 'ул', address)
+        address = re.sub('проспект', 'пр-кт', address)
+        house_number = r'\d+\/?(\s?\w?\.?\s?\d?)'
+        number = re.search(house_number, address).group()
+        slash_number = number.replace('к', '/')
+        address = address.replace(number, slash_number)
+
+        return address
 
     @classmethod
     def create_tasks_by_prev_data(cls, data):
