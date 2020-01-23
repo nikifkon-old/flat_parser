@@ -40,7 +40,7 @@ class GettingAvitoFlatInfo(Task):
     def parse(self, driver):
         result = []
         container = driver.find_element_by_xpath(".//*[@data-marker='items/list']")
-        items = container.find_elements_by_xpath(".//*[@data-marker='item/link']")
+        items = container.find_elements_by_xpath(".//*[@data-marker='item/link']/../..")
         items_text = [item.text for item in items]
         with ProcessPoolExecutor(os.cpu_count()) as executor:
             result = executor.map(self.parse_item, items_text)
