@@ -30,7 +30,10 @@ def main():
             sys.exit(1)
         data = task.run()
 
-        tasks = GettingHouseInfo.create_tasks_by_prev_data(data)
+        start_time = time()
+        addresses = [flat.get("address") for flat in data]
+        print(f"Time: {round(time() - start_time, 2)} sec.")
+        tasks = GettingHouseInfo.create_tasks_from_addresses(addresses, data)
         with ProcessPoolExecutor(os.cpu_count()) as executor:
             executor.map(run_task, tasks)
     else:

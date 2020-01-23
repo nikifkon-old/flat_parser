@@ -39,11 +39,14 @@ class GettingHouseInfo(Task):
         return cls(name, url, *args, **kwargs)
 
     @classmethod
-    def create_tasks_from_addresses(cls, addresses, *args, **kwargs):
+    def create_tasks_from_addresses(cls, addresses, prev_datas=None):
+        if prev_datas is None:
+            prev_datas = [None for _ in range(len(addresses))]
         name = "getting_house_info"
-        for address in addresses:
+
+        for address, prev_data in zip(addresses, prev_datas):
             url = HOUSE_INFO_URL + cls.get_searchable_address(address)
-            yield cls(name, url, *args, **kwargs)
+            yield cls(name, url, prev_data=prev_data)
 
     @staticmethod
     def get_searchable_address(address):

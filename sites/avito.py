@@ -6,9 +6,6 @@ from selenium import webdriver
 from flat_parser.web_parser.parser import Task
 
 
-HOUSE_INFO_URL = "https://domaekb.ru/search?adres="
-
-
 class GettingAvitoFlatInfo(Task):
     """ Get list of items urls for parse """
     scroll_sleep_time = 0.4
@@ -75,7 +72,7 @@ class GettingAvitoFlatInfo(Task):
             "floor_num": floor_num,
             "metro_distance": metro_distance
         }
-        return self.with_house_info_url(row)
+        return row
 
     def get_address(self, item):
         street_name = r'((\d{1,3}(\s|-)){0,1}(?!км\b)\b\w+\s?){1,3}'
@@ -95,20 +92,10 @@ class GettingAvitoFlatInfo(Task):
             #     file.write(f'Error while parsing item(address) is None): '\
             #                f'{repr(item)}\n')
         else:
-            number = address.group('number')
-            mod_number = number.replace('к', '/')
-            address = address.group().replace(number, mod_number)
-
+            address = address.group()
             if '\n' in address:
                 address = address.split('\n')[0]
-        normal_address = address.replace('проспект', 'пр-кт').replace('пр-т', 'пр-кт').replace('улица', 'ул')
-        return normal_address.strip()
-
-    def with_house_info_url(self, row):
-        address = row.get("address")
-        if address:
-            row['url'] = HOUSE_INFO_URL + address
-        return row
+        return address.strip()
 
     def save_data(self, data):
         return data
