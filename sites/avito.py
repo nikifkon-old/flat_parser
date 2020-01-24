@@ -15,7 +15,7 @@ class GettingAvitoFlatInfo(Task):
 
     def __init__(self, *args, **kwargs):
         options = webdriver.ChromeOptions()
-        # options.add_argument("headless")
+        options.add_argument("headless")
         driver_kwargs = {
             'mobile': True
         }
@@ -26,12 +26,12 @@ class GettingAvitoFlatInfo(Task):
         new = None
         load_more_button = None
         while last != new or load_more_button:
-            # try:
-            #     load_more_button = driver.find_element_by_xpath("//div[.='%s']//span"
-            #                                                     % self.load_more_button_label)
-            #     load_more_button.click()
-            # except NoSuchElementException:
-            #     load_more_button = None
+            try:
+                load_more_button = driver.find_element_by_xpath("//div[.='%s']//span"
+                                                                % self.load_more_button_label)
+                load_more_button.click()
+            except NoSuchElementException:
+                load_more_button = None
             last = new
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
             sleep(self.scroll_sleep_time)

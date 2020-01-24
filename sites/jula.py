@@ -1,4 +1,5 @@
 import re
+from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from flat_parser.web_parser.parser import Task
 from flat_parser.web_parser.parser import TaskManager
@@ -27,6 +28,11 @@ class GettingJulaFlatInfo(Task):
 
 class ParseJulaItem(Task):
     debug_file = "jula_debug.log"
+
+    def __init__(self, *args, **kwargs):
+        options = webdriver.ChromeOptions()
+        options.add_argument("headless")
+        super().__init__(*args, driver_options=options, **kwargs)
 
     def prepare(self, driver):
         dl = driver.find_element_by_xpath("//li[@data-test-block='Attributes']//dl[@data-test-component='DescriptionList']")
