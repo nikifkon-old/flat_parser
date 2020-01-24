@@ -30,8 +30,7 @@ def main():
             sys.exit(1)
         data = task.run()
 
-        addresses = [flat.get("address") for flat in data]
-        tasks = GettingHouseInfo.create_tasks_from_addresses(addresses, data)
+        tasks = GettingHouseInfo.create_tasks_from_addresses(data)
         with ProcessPoolExecutor(os.cpu_count()) as executor:
             executor.map(run_task, tasks)
     else:

@@ -22,31 +22,31 @@ def check_data(data):
     assert data.get('url') is None
 
 
-def test_classmethod(prev_data):
-    tasks = GettingHouseInfoLog.create_tasks_by_prev_data(prev_data)
-    assert len(tasks) == len(prev_data)
-    i = 0
-    task = tasks[i]
-    assert task.prev_data == prev_data[i]
-
-    data = task.run()
-    task.prev_data.pop('url')
-    assert set(task.prev_data).issubset(set(data))
-
-
 def test_create_task_from_address():
-    address = 'пр Академика Сахарова , 2'
-    task = GettingHouseInfoLog.create_task_from_address(address)
+    prev_data = {
+        'test': 'test',
+        'address': 'пр Академика Сахарова , 2'
+    }
+
+    task = GettingHouseInfoLog.create_task_from_address(prev_data)
     assert task
     assert HOUSE_INFO_URL in task.url
 
 
 def test_create_tasks_from_addresses():
-    addresses = ['пр Академика Сахарова , 2', 'пр Академика Сахарова , 2']
-    tasks = GettingHouseInfoLog.create_tasks_from_addresses(addresses)
+    prev_datas = [{
+            'test': 'test',
+            'address': 'пр Академика Сахарова , 2'
+        },
+        {
+            'test': 'test',
+            'address': 'пр Академика Сахарова , 2'
+        }
+    ]
+    tasks = GettingHouseInfoLog.create_tasks_from_addresses(prev_datas)
     assert tasks
     assert isinstance(tasks, Iterator)
-    assert len(list(tasks)) == len(addresses)
+    assert len(list(tasks)) == len(prev_datas)
 
 
 @pytest.mark.parametrize('address, expected', [

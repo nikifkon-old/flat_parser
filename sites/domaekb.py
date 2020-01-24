@@ -33,18 +33,18 @@ class GettingHouseInfo(Task):
         super().__init__(*args, driver_options=options, driver_kwargs=driver_kwargs, **kwargs)
 
     @classmethod
-    def create_task_from_address(cls, address, *args, **kwargs):
+    def create_task_from_address(cls, prev_data):
         name = "getting_house_info"
+        address = prev_data.get('address')
         url = HOUSE_INFO_URL + cls.get_searchable_address(address)
-        return cls(name, url, *args, **kwargs)
+        return cls(name, url, prev_data=prev_data)
 
     @classmethod
-    def create_tasks_from_addresses(cls, addresses, prev_datas=None):
-        if prev_datas is None:
-            prev_datas = [None for _ in range(len(addresses))]
+    def create_tasks_from_addresses(cls, prev_datas):
         name = "getting_house_info"
 
-        for address, prev_data in zip(addresses, prev_datas):
+        for prev_data in prev_datas:
+            address = prev_data.get('address')
             url = HOUSE_INFO_URL + cls.get_searchable_address(address)
             yield cls(name, url, prev_data=prev_data)
 
@@ -61,14 +61,6 @@ class GettingHouseInfo(Task):
         address = address.replace(number, slash_number)
 
         return address
-
-    @classmethod
-    def create_tasks_by_prev_data(cls, data):
-        name = "getting_house_info"
-        tasks = []
-        for item in data:
-            tasks.append(cls(name, item['url'], prev_data=item))
-        return tasks
 
     def prepare(self, driver):
         wait = WebDriverWait(driver, 10)
