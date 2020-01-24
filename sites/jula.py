@@ -1,4 +1,5 @@
 import re
+from selenium.common.exceptions import NoSuchElementException
 from flat_parser.web_parser.parser import Task
 from flat_parser.web_parser.parser import TaskManager
 
@@ -25,6 +26,8 @@ class GettingJulaFlatInfo(Task):
 
 
 class ParseJulaItem(Task):
+    debug_file = "jula_debug.log"
+
     def prepare(self, driver):
         dl = driver.find_element_by_xpath("//li[@data-test-block='Attributes']//dl[@data-test-component='DescriptionList']")
         load_more_btn = dl.find_element_by_xpath("./dd[last()]/button")
@@ -55,7 +58,12 @@ class ParseJulaItem(Task):
         return data
 
     def get_dd_by_dt_text(self, dl, text):
-        return dl.find_element_by_xpath(f".//dt[.='{text}']/following-sibling::dd").text
+        try:
+            return dl.find_element_by_xpath(f".//dt[.='{text}']/following-sibling::dd").text
+        except NoSuchElementException:
+            with open(self.debug_file, 'a', encoding='utf-8') as file:
+                file.write(f'Unable to find {text} in {self.url}\n')
+            return None
 
     def save_data(self, data):
         return data

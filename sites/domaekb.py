@@ -55,9 +55,10 @@ class GettingHouseInfo(Task):
         address = re.sub('пр ', 'пр-кт ', address)
         address = re.sub('улица', 'ул', address)
         address = re.sub('проспект', 'пр-кт', address)
-        house_number = r'\d+\/?(\s?\w?\.?\s?\d?)'
+        address = re.sub('Россия,? ', '', address)
+        house_number = r'\d+\/?(\s?(корпус|\w?)\.?\s?\d?)'
         number = re.search(house_number, address).group()
-        slash_number = number.replace('к', '/')
+        slash_number = re.sub('\s?к(орпус)?\s?', '/', number)
         address = address.replace(number, slash_number)
 
         return address
