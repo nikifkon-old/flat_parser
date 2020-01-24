@@ -1,8 +1,7 @@
 import re
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
-from flat_parser.web_parser.parser import Task
-from flat_parser.web_parser.parser import TaskManager
+from flat_parser.web_parser.parser import Task, TaskManager, StopTaskException
 
 
 class GettingJulaFlatInfo(Task):
@@ -35,9 +34,14 @@ class ParseJulaItem(Task):
         super().__init__(*args, driver_options=options, **kwargs)
 
     def prepare(self, driver):
-        dl = driver.find_element_by_xpath("//li[@data-test-block='Attributes']//dl[@data-test-component='DescriptionList']")
-        load_more_btn = dl.find_element_by_xpath("./dd[last()]/button")
-        load_more_btn.click()
+        try:
+            dl = driver.find_element_by_xpath("//li[@data-test-block='Attributes']//dl[@data-test-component='DescriptionList']")
+            load_more_btn = dl.find_element_by_xpath("./dd[last()]/button")
+            load_more_btn.click()
+        except NoSuchElementException:
+            with open(self.debug_file, 'a', encoding='utf-8') as file:
+                file.write(f'Unable to find decription at {self.url}')
+            raise StopTaskException()
 
     def parse(self, driver):
         data = {}
