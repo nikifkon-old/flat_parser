@@ -1,7 +1,16 @@
+import os
 import re
+from concurrent.futures import ProcessPoolExecutor
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 from flat_parser.web_parser.parser import Task, TaskManager, StopTaskException
+
+
+def run_task(task):
+    return task.run()
 
 
 class GettingJulaFlatInfo(Task):
@@ -16,10 +25,9 @@ class GettingJulaFlatInfo(Task):
     def parse_items(self, links):
         manager = TaskManager()
         tasks = manager.create_tasks(ParseJulaItem, "pasre_jula_item", links)
-        data = []
-        for task in tasks:
-            data.append(task.run())
-        return data
+        with ProcessPoolExecutor(os.cpu_count()) as executor:
+            result = executor.map(run_task, tasks)
+        return result
 
     def save_data(self, data):
         return data
@@ -34,8 +42,11 @@ class ParseJulaItem(Task):
         super().__init__(*args, driver_options=options, **kwargs)
 
     def prepare(self, driver):
+        dl_xpath = "//li[@data-test-block='Attributes']//dl[@data-test-component='DescriptionList']"
+        wait = WebDriverWait(driver, 10)
         try:
-            dl = driver.find_element_by_xpath("//li[@data-test-block='Attributes']//dl[@data-test-component='DescriptionList']")
+            wait.until(EC.presence_of_all_elements_located((By.XPATH, dl_xpath)))
+            dl = driver.find_element_by_xpath(dl_xpath)
             load_more_btn = dl.find_element_by_xpath("./dd[last()]/button")
             load_more_btn.click()
         except NoSuchElementException:
