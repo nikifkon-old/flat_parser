@@ -1,16 +1,23 @@
 from collections import namedtuple
 from time import sleep
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 from flat_parser.web_parser.parser import Task
 
 
 class GettingUPNFlatInfo(Task):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, page_count=None, **kwargs):
         self.flat_namedtuple = namedtuple('Flat', ['membership', 'rooms',
                                                    'address', 'areas',
                                                    'floors', 'price',
                                                    'house', 'year',
                                                    'walls', 'sell_conditions',
                                                    'video'])
+        if page_count is None:
+            page_count = 10
+        self.page_count = page_count
         super().__init__(*args, **kwargs)
 
     def prepare(self, driver):
@@ -20,11 +27,27 @@ class GettingUPNFlatInfo(Task):
         part_checkbox.click()
         submit = driver.find_element_by_xpath("//a[@data-gpush]")
         submit.click()
-        sleep(1)
 
     def parse(self, driver):
-        trs = driver.find_elements_by_xpath("//div[@id='panel_search']//table/tbody/tr")
+        result = []
+        for _ in range(self.page_count):
+            result.extend(self.parse_page(driver))
+            self.go_to_next_page(driver)
+        return result
 
+    def go_to_next_page(self, driver):
+        btn_xpath = "//div[@id='panel_search']//div[@class='pager_panel right']/div[@class='middle']/a[position()=last()-1]"
+        next_page_btn = driver.find_element_by_xpath(btn_xpath)
+        next_page_btn.click()
+
+    def parse_page(self, driver):
+        table_xpath = "//div[@id='panel_search']//table/tbody/tr"
+        wait = WebDriverWait(driver, 10)
+        try:
+            wait.until(EC.presence_of_all_elements_located((By.XPATH, table_xpath)))
+        except NoSuchElementException:
+            return None
+        trs = driver.find_elements_by_xpath("//div[@id='panel_search']//table/tbody/tr")
         result = [self.parse_tr(tr) for tr in trs]
         return result
 
@@ -40,6 +63,10 @@ class GettingUPNFlatInfo(Task):
         data.pop('walls')
         data.pop('sell_conditions')
         data.pop('video')
+
+        if data.get("address") is None:
+            with open(self.debug_file, 'a', encoding='utf-8') as file:
+                file.write(f'Address is None at {data.get("link")}')
         return data
 
     def parse_tr(self, tr):
@@ -49,4 +76,5 @@ class GettingUPNFlatInfo(Task):
         return self.clean_data(data)
 
     def save_data(self, data):
+        
         return data
