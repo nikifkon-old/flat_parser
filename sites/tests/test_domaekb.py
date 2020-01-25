@@ -57,11 +57,13 @@ def test_create_tasks_from_addresses():
     ('пр Академика Сахарова , 2', 'пр-кт Академика Сахарова , 2'),
     ('Россия, Екатеринбург, Бессарабская ул, 10А', 'Екатеринбург, Бессарабская ул, 10А'),
     ('Екатеринбург, Россия Байкальская ул, 35', 'Екатеринбург, Байкальская ул, 35'),
-    ('Екатеринбург, Водоемная ул, 80 корпус 3', 'Екатеринбург, Водоемная ул, 80/3')
+    ('Екатеринбург, Водоемная ул, 80 корпус 3', 'Екатеринбург, Водоемная ул, 80/3'),
+    ('Аппаратная станция 6', 'Аппаратная 6'),
+    (None, None)
 ])
-def test_get_searchable_address(create_house_info_task, address, expected):
+def test_get_normalize_addresss(create_house_info_task, address, expected):
     task = create_house_info_task("ok")
-    assert expected == task.get_searchable_address(address)
+    assert expected == task.get_normalize_address(address)
 
 
 def test_ok(create_house_info_task):

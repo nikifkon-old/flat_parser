@@ -36,7 +36,7 @@ class GettingHouseInfo(Task):
     def create_task_from_address(cls, prev_data):
         name = "getting_house_info"
         address = prev_data.get('address')
-        url = HOUSE_INFO_URL + cls.get_searchable_address(address)
+        url = HOUSE_INFO_URL + cls.get_normalize_address(address)
         return cls(name, url, prev_data=prev_data)
 
     @classmethod
@@ -45,26 +45,23 @@ class GettingHouseInfo(Task):
 
         for prev_data in prev_datas:
             address = prev_data.get('address')
-            url = HOUSE_INFO_URL + cls.get_searchable_address(address)
+            url = HOUSE_INFO_URL + cls.get_normalize_address(address)
             yield cls(name, url, prev_data=prev_data)
 
     @staticmethod
-    def get_searchable_address(address):
-        try:
+    def get_normalize_address(address):
+        if address is not None:
             address = re.sub('проспект', 'пр-кт', address)
             address = re.sub('пр-т', 'пр-кт', address)
             address = re.sub('пр ', 'пр-кт ', address)
             address = re.sub('улица', 'ул', address)
             address = re.sub('проспект', 'пр-кт', address)
             address = re.sub('Россия,? ', '', address)
+            address = re.sub('станция ?', '', address)
             house_number = r'\d+\/?(\s?(корпус|\w)?\.?\s?\d?)'
             number = re.search(house_number, address).group()
             slash_number = re.sub('\s?к(орпус)?\s?', '/', number)
             address = address.replace(number, slash_number)
-        except:
-            with open('house_info_debug.log', 'a', encoding='utf-8') as file:
-                file.write(f'Unable get searchabel address: {address}, add me to test case\n')
-
         return address
 
     def prepare(self, driver):
