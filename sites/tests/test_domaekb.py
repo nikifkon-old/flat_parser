@@ -59,7 +59,8 @@ def test_create_tasks_from_addresses():
     ('Екатеринбург, Россия Байкальская ул, 35', 'Екатеринбург, Байкальская ул, 35'),
     ('Екатеринбург, Водоемная ул, 80 корпус 3', 'Екатеринбург, Водоемная ул, 80/3'),
     ('Аппаратная станция 6', 'Аппаратная 6'),
-    (None, None)
+    (None, None),
+    ('', '')
 ])
 def test_get_normalize_addresss(create_house_info_task, address, expected):
     task = create_house_info_task("ok")

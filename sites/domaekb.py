@@ -50,7 +50,7 @@ class GettingHouseInfo(Task):
 
     @staticmethod
     def get_normalize_address(address):
-        if address is not None:
+        if address is not None and address != '':
             address = re.sub('проспект', 'пр-кт', address)
             address = re.sub('пр-т', 'пр-кт', address)
             address = re.sub('пр ', 'пр-кт ', address)
