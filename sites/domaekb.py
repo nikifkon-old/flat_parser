@@ -50,16 +50,20 @@ class GettingHouseInfo(Task):
 
     @staticmethod
     def get_searchable_address(address):
-        address = re.sub('проспект', 'пр-кт', address)
-        address = re.sub('пр-т', 'пр-кт', address)
-        address = re.sub('пр ', 'пр-кт ', address)
-        address = re.sub('улица', 'ул', address)
-        address = re.sub('проспект', 'пр-кт', address)
-        address = re.sub('Россия,? ', '', address)
-        house_number = r'\d+\/?(\s?(корпус|\w?)\.?\s?\d?)'
-        number = re.search(house_number, address).group()
-        slash_number = re.sub('\s?к(орпус)?\s?', '/', number)
-        address = address.replace(number, slash_number)
+        try:
+            address = re.sub('проспект', 'пр-кт', address)
+            address = re.sub('пр-т', 'пр-кт', address)
+            address = re.sub('пр ', 'пр-кт ', address)
+            address = re.sub('улица', 'ул', address)
+            address = re.sub('проспект', 'пр-кт', address)
+            address = re.sub('Россия,? ', '', address)
+            house_number = r'\d+\/?(\s?(корпус|\w)?\.?\s?\d?)'
+            number = re.search(house_number, address).group()
+            slash_number = re.sub('\s?к(орпус)?\s?', '/', number)
+            address = address.replace(number, slash_number)
+        except:
+            with open('house_info_debug.log', 'a', encoding='utf-8') as file:
+                file.write(f'Unable get searchabel address: {address}, add me to test case\n')
 
         return address
 
