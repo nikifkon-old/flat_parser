@@ -13,3 +13,4 @@ def test_jula_item_parse():
     assert data.get('floor_num') == '5'
     assert data.get('total_area') == '48 м²'
     assert data.get('kitchen_area') == '7 м²'
+    assert data.get('link') == url

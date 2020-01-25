@@ -3,6 +3,7 @@ import os
 from time import sleep
 from concurrent.futures import ProcessPoolExecutor
 from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
 from flat_parser.web_parser.parser import Task
 
 
@@ -98,6 +99,7 @@ class GettingAvitoFlatInfo(Task):
         return address.strip()
 
     def save_data(self, data):
+        data["link"] = self.url
         return data
         # with open(self.file_path, 'a', encoding='utf-8') as file:
         #     for item in data:

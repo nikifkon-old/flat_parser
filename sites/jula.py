@@ -87,4 +87,5 @@ class ParseJulaItem(Task):
             return None
 
     def save_data(self, data):
+        data["link"] = self.url
         return data
