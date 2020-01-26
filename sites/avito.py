@@ -13,6 +13,7 @@ class GettingAvitoFlatInfo(Task):
     load_more_button_label = "Загрузить еще"
     file_path = 'flat_info.json'
     debug_file = "flat_info_debug.log"
+    max_count = 10
 
     def __init__(self, *args, **kwargs):
         options = webdriver.ChromeOptions()
@@ -26,7 +27,8 @@ class GettingAvitoFlatInfo(Task):
         last = driver.execute_script("return document.body.scrollHeight")
         new = None
         load_more_button = None
-        while last != new or load_more_button:
+        count = 0
+        while (last != new or load_more_button) and count < self.max_count:
             try:
                 load_more_button = driver.find_element_by_xpath("//div[.='%s']//span"
                                                                 % self.load_more_button_label)
@@ -37,6 +39,7 @@ class GettingAvitoFlatInfo(Task):
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
             sleep(self.scroll_sleep_time)
             new = driver.execute_script("return document.body.scrollHeight")
+            count += 1
 
     def parse(self, driver):
         result = []

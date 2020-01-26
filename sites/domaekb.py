@@ -123,7 +123,7 @@ class GettingHouseInfo(Task):
 
     def presave_hook(self, data):
         if self.prev_data:
-            data.update(self.prev_data)
+            data = self.prev_data.update(data)
         year = data.get('build_year')
         if year is not None:
             data['build_year'] = datetime.now().year - int(year)
