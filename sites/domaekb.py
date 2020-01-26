@@ -58,10 +58,15 @@ class GettingHouseInfo(Task):
             address = re.sub('проспект', 'пр-кт', address)
             address = re.sub('Россия,? ', '', address)
             address = re.sub('станция ?', '', address)
-            house_number = r'\d+\/?(\s?(корпус|\w)?\.?\s?\d?)'
-            number = re.search(house_number, address).group()
-            slash_number = re.sub('\s?к(орпус)?\s?', '/', number)
-            address = address.replace(number, slash_number)
+            try:
+                house_number = r'\d+\/?(\s?(корпус|\w)?\.?\s?\d?)'
+                number = re.search(house_number, address).group()
+                slash_number = re.sub('\s?к(орпус)?\s?', '/', number)
+                address = address.replace(number, slash_number)
+            except AttributeError:
+                with open('house_info_debug.log', 'a', encoding='utf-8') as file:
+                    file.write(f'Can not get number from address: {address}\n')
+
         return address
 
     def prepare(self, driver):
@@ -123,7 +128,7 @@ class GettingHouseInfo(Task):
 
     def presave_hook(self, data):
         if self.prev_data:
-            data = self.prev_data.update(data)
+            data = {**self.prev_data, **data}
         year = data.get('build_year')
         if year is not None:
             data['build_year'] = datetime.now().year - int(year)
