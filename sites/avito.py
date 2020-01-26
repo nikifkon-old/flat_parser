@@ -45,12 +45,17 @@ class GettingAvitoFlatInfo(Task):
         result = []
         container = driver.find_element_by_xpath(".//*[@data-marker='items/list']")
         items = container.find_elements_by_xpath(".//*[@data-marker='item/link']/../..")
-        items_text = [item.text for item in items]
+        items_data = []
+        for item in items:
+            url = item.find_element_by_xpath(".//a").get_attribute('href')
+            items_data.append((item.text, url))
         with ProcessPoolExecutor(os.cpu_count()) as executor:
-            result = executor.map(self.parse_item, items_text)
+            result = executor.map(self.parse_item, items_data)
         return result
 
-    def parse_item(self, item):
+    def parse_item(self, data):
+        item = data[0]
+        url = data[1]
         price_mo = re.compile(r'(?P<price>(\d+ ?)+).руб\.')
         total_area_mo = re.compile(r'(?P<area>\d+(\.)?\d) м²')
         floor_mo = re.compile(r'(?P<floor>\d+)\/(?P<floor_num>\d+) эт.')
@@ -74,7 +79,8 @@ class GettingAvitoFlatInfo(Task):
             "total_area": total_area,
             "floor": floor,
             "floor_num": floor_num,
-            "metro_distance": metro_distance
+            "metro_distance": metro_distance,
+            "link": url
         }
         return row
 
@@ -102,7 +108,6 @@ class GettingAvitoFlatInfo(Task):
         return address.strip()
 
     def save_data(self, data):
-        data["link"] = self.url
         return data
         # with open(self.file_path, 'a', encoding='utf-8') as file:
         #     for item in data:
