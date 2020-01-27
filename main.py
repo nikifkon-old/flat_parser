@@ -10,7 +10,7 @@ from flat_parser.sites.upn import GettingUPNFlatInfo
 
 
 AVITO_URL = "https://m.avito.ru/ekaterinburg/kvartiry/prodam/vtorichka"
-JULA_URL = "https://youla.ru/ekaterinburg/nedvijimost/prodaja-kvartiri"
+JULA_URL = "https://youla.ru/ekaterinburg/nedvijimost/prodaja-kvartiri?attributes[realty_building_type][0]=166228"
 UPN_URL = "https://upn.ru/realty_eburg_flat_sale.htm#panel_search"
 
 

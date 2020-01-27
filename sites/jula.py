@@ -14,7 +14,7 @@ def run_task(task):
 
 
 class GettingJulaFlatInfo(Task):
-    max_count = 15
+    max_count = 6
 
     def __init__(self, *args, **kwargs):
         options = webdriver.ChromeOptions()
