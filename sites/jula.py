@@ -1,6 +1,5 @@
 import os
 import re
-from time import sleep
 from concurrent.futures import ProcessPoolExecutor
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
@@ -15,8 +14,7 @@ def run_task(task):
 
 
 class GettingJulaFlatInfo(Task):
-    scroll_sleep_time = 0.4
-    max_count = 10
+    max_count = 15
 
     def __init__(self, *args, **kwargs):
         options = webdriver.ChromeOptions()
@@ -27,10 +25,16 @@ class GettingJulaFlatInfo(Task):
         last = driver.execute_script("return document.body.scrollHeight")
         new = None
         count = 0
+        wait = WebDriverWait(driver, 10)
         while last != new and count < self.max_count:
             last = new
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
-            sleep(self.scroll_sleep_time)
+            loader_xpath = "//aside[@data-component='Paginator']//div[@class='loader-colored']"
+            try:
+                wait.until(EC.presence_of_element_located((By.XPATH, loader_xpath)))
+                wait.until(EC.invisibility_of_element_located((By.XPATH, loader_xpath)))
+            except NoSuchElementException:
+                break
             new = driver.execute_script("return document.body.scrollHeight")
             count += 1
 
