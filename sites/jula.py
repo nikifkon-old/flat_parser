@@ -2,7 +2,7 @@ import os
 import re
 from concurrent.futures import ProcessPoolExecutor
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -33,7 +33,7 @@ class GettingJulaFlatInfo(Task):
             try:
                 wait.until(EC.presence_of_element_located((By.XPATH, loader_xpath)))
                 wait.until(EC.invisibility_of_element_located((By.XPATH, loader_xpath)))
-            except NoSuchElementException:
+            except (NoSuchElementException, TimeoutException):
                 break
             new = driver.execute_script("return document.body.scrollHeight")
             count += 1
