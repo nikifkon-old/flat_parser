@@ -63,6 +63,7 @@ class GettingHouseInfo(Task):
             address = re.sub('(, )?городской округ Екатеринбург,? ?', '', address)
             address = re.sub('(, )?Екатеринбург,? ?', '', address)
             address = re.sub('станция ?', '', address)
+            address = re.sub(', д', ', ', address)
             try:
                 house_number = r'\d+\/?(\s?(корпус|ст|\w)?\.?\s?\d?)'
                 number = re.search(house_number, address).group()
