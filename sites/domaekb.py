@@ -56,12 +56,21 @@ class GettingHouseInfo(Task):
             address = re.sub('пр ', 'пр-кт ', address)
             address = re.sub('улица', 'ул', address)
             address = re.sub('проспект', 'пр-кт', address)
-            address = re.sub('Россия,? ', '', address)
+            address = re.sub('переулок', 'пер.', address)
+            address = re.sub('(, )?Россия,? ?', '', address)
+            address = re.sub('(, )?Свердловская область,? ?', '', address)
+            address = re.sub('(, )?Свердловская обл.,? ?', '', address)
+            address = re.sub('(, )?городской округ Екатеринбург,? ?', '', address)
+            address = re.sub('(, )?Екатеринбург,? ?', '', address)
             address = re.sub('станция ?', '', address)
             try:
-                house_number = r'\d+\/?(\s?(корпус|\w)?\.?\s?\d?)'
+                house_number = r'\d+\/?(\s?(корпус|ст|\w)?\.?\s?\d?)'
                 number = re.search(house_number, address).group()
-                slash_number = re.sub('\s?к(орпус)?\s?', '/', number)
+                slash_number = number
+                if 'к' in number:
+                    slash_number = re.sub(' ?к(орпус)? ?', '/', number)
+                elif 'ст' in number:
+                    slash_number = re.sub(' ?ст(анция)? ?', '/', number)
                 address = address.replace(number, slash_number)
             except AttributeError:
                 with open('house_info_debug.log', 'a', encoding='utf-8') as file:
@@ -148,4 +157,5 @@ class GettingHouseInfo(Task):
 
     def log_error(self):
         with open(self.debug_file, 'a', encoding='utf-8') as file:
-            file.write(f'Address not found in domaekb.ru {self.url}\n')
+            file.write(f"Address not found in domaekb.ru {self.url} "
+                       f"at {self.prev_data.get('link')}\n")
