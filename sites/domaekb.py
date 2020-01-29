@@ -44,9 +44,10 @@ class GettingHouseInfo(Task):
         name = "getting_house_info"
 
         for prev_data in prev_datas:
-            address = prev_data.get('address')
-            url = HOUSE_INFO_URL + cls.get_normalize_address(address)
-            yield cls(name, url, prev_data=prev_data)
+            if prev_data:
+                address = prev_data.get('address')
+                url = HOUSE_INFO_URL + cls.get_normalize_address(address)
+                yield cls(name, url, prev_data=prev_data)
 
     @staticmethod
     def get_normalize_address(address):

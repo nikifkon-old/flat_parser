@@ -41,12 +41,13 @@ def test_create_tasks_from_addresses():
         {
             'test': 'test',
             'address': 'пр Академика Сахарова , 2'
-        }
+        },
+        None
     ]
     tasks = GettingHouseInfoLog.create_tasks_from_addresses(prev_datas)
     assert tasks
     assert isinstance(tasks, Iterator)
-    assert len(list(tasks)) == len(prev_datas)
+    assert len(list(tasks)) == 2
 
 
 @pytest.mark.parametrize('address, expected', [
