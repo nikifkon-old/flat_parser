@@ -4,6 +4,7 @@ from concurrent.futures import ProcessPoolExecutor
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from flat_parser.web_parser.parser import Task, TaskManager, StopTaskException
@@ -14,7 +15,7 @@ def run_task(task):
 
 
 class GettingJulaFlatInfo(Task):
-    max_count = 6
+    max_count = 2
 
     def __init__(self, *args, **kwargs):
         options = webdriver.ChromeOptions()
@@ -63,13 +64,20 @@ class ParseJulaItem(Task):
     def __init__(self, *args, **kwargs):
         options = webdriver.ChromeOptions()
         options.add_argument("headless")
-        super().__init__(*args, driver_options=options, **kwargs)
+
+        capa = DesiredCapabilities.CHROME
+        capa['pageLoadStrategy'] = "none"
+        driver_kwargs = {
+            "desired_capabilities": capa
+        }
+        super().__init__(*args, driver_options=options, driver_kwargs=driver_kwargs, **kwargs)
 
     def prepare(self, driver):
         dl_xpath = "//li[@data-test-block='Attributes']//dl[@data-test-component='DescriptionList']"
         wait = WebDriverWait(driver, 10)
         try:
             wait.until(EC.presence_of_all_elements_located((By.XPATH, dl_xpath)))
+            driver.execute_script("window.stop();")
             dl = driver.find_element_by_xpath(dl_xpath)
             load_more_btn = dl.find_element_by_xpath("./dd[last()]/button")
             load_more_btn.click()
