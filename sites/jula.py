@@ -81,24 +81,26 @@ class ParseJulaItem(Task):
             dl = driver.find_element_by_xpath(dl_xpath)
             load_more_btn = dl.find_element_by_xpath("./dd[last()]/button")
             load_more_btn.click()
-        except NoSuchElementException:
+        except (NoSuchElementException, TimeoutException):
             with open(self.debug_file, 'a', encoding='utf-8') as file:
                 file.write(f'Unable to find decription at {self.url}')
             raise StopTaskException()
 
+    def get_price(self, driver):
+        price_blank = '\u205f'
+        price_mo = re.compile(r'(?P<price>(\d+%s?)+)' % price_blank)
+        price_text = driver.find_element_by_xpath("//span[@data-test-component='Price']").text
+        price = re.search(price_mo, price_text)
+        return price.group('price')
+
     def parse(self, driver):
         data = {}
-        price_blank = '\u205f'
-        price_text = driver.find_element_by_xpath("//span[@data-test-component='Price']").text
-        price_mo = re.compile(r'(?P<price>(\d+%s?)+)' % price_blank)
-        price = re.search(price_mo, price_text).group('price')
-        data["price"] = price
 
-        address = driver.find_element_by_xpath("//li[@data-test-component='ProductMap']//span").text
-        data["address"] = address
-        # modify address
+        data["price"] = self.get_price(driver)
+        address = driver.find_element_by_xpath("//li[@data-test-component='ProductMap']//span")
+        data["address"] = address.text
+
         dl = driver.find_element_by_xpath("//li[@data-test-block='Attributes']//dl[@data-test-component='DescriptionList']")
-
         prop_list = [
             ('floor', 'Этаж'),
             ('floor_num', 'Этажность дома'),
@@ -107,7 +109,6 @@ class ParseJulaItem(Task):
         ]
         for var_name, label in prop_list:
             data[var_name] = self.get_dd_by_dt_text(dl, label)
-
         return data
 
     def get_dd_by_dt_text(self, dl, text):

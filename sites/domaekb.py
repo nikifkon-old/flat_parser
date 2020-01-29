@@ -97,12 +97,10 @@ class GettingHouseInfo(Task):
             table = driver.find_element_by_xpath("//div[@class='region region-content']//table[2]")
             td = table.find_element_by_xpath(".//td[@class='views-field views-field-field-address'][1]")
             link = td.find_element_by_xpath("./a")
+            link.click()
         except NoSuchElementException:
             self.log_error()
             raise StopTaskException()
-
-        link.click()
-
         # parse house info table
         wait = WebDriverWait(driver, 10)
         wait.until(EC.presence_of_all_elements_located(
@@ -127,7 +125,6 @@ class GettingHouseInfo(Task):
 
         for name, label in items:
             data[name] = self.get_table_item(container, label)
-
         return data
 
     def get_table_item(self, container, text):

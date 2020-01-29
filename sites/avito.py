@@ -89,18 +89,17 @@ class GettingAvitoFlatInfo(Task):
         street_types = r'(бульвар|б-р|ул|улица|пер|ш|пр-т|nул|пр-кт)\.?'
         house_number = r'\d+\/?(\s?\w?\.?\s?\d?)'
         address_mo = re.compile(r'((%s\s?%s)|(%s\s?%s)),\s?(?P<number>%s)'
-                                % (street_types,
-                                   street_name,
-                                   street_name,
-                                   street_types,
+                                % (street_types, street_name,
+                                   street_name, street_types,
                                    house_number))
 
         address = re.search(address_mo, item)
         if address is None:
             address = item.split('\n')[-2]
-            # with open(self.debug_file, 'a', encoding='utf-8') as file:
-            #     file.write(f'Error while parsing item(address) is None): '\
-            #                f'{repr(item)}\n')
+            with open(self.debug_file, 'a', encoding='utf-8') as file:
+                file.write(('[Warning] Address dont match re.'
+                            'We set address to `%s`,'
+                            'text: %s \n') % (address, item))
         else:
             address = address.group()
             if '\n' in address:

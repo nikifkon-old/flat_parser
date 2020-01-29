@@ -1,5 +1,4 @@
 from collections import namedtuple
-from time import sleep
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.by import By
@@ -76,5 +75,4 @@ class GettingUPNFlatInfo(Task):
         return self.clean_data(data)
 
     def save_data(self, data):
-        
         return data
