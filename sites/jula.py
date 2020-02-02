@@ -15,7 +15,7 @@ def run_task(task):
 
 
 class GettingJulaFlatInfo(Task):
-    max_count = 2
+    max_count = 5
 
     def __init__(self, *args, **kwargs):
         options = webdriver.ChromeOptions()
@@ -91,7 +91,12 @@ class ParseJulaItem(Task):
         price_mo = re.compile(r'(?P<price>(\d+%s?)+)' % price_blank)
         price_text = driver.find_element_by_xpath("//span[@data-test-component='Price']").text
         price = re.search(price_mo, price_text)
-        return price.group('price')
+        if price is not None:
+            price = price.group('price')
+            price_int = ''.join(price.split(price_blank))
+            return price_int
+        else:
+            return ''
 
     def parse(self, driver):
         data = {}
@@ -119,6 +124,18 @@ class ParseJulaItem(Task):
                 file.write(f'Unable to find {text} in {self.url}\n')
             return None
 
+    def clean_data(self, data):
+        if data is not None:
+            m_sq = ' м²'
+            total_area = data.get("total_area")
+            kitchen_area = data.get("kitchen_area")
+            if total_area:
+                data["total_area"] = ''.join(total_area.split(m_sq))
+            if kitchen_area:
+                data["kitchen_area"] = ''.join(kitchen_area.split(m_sq))
+        return data
+
     def save_data(self, data):
+        data = self.clean_data(data)
         data["link"] = self.url
         return data
