@@ -108,13 +108,12 @@ class Task():
             full_data = self.presave_hook(data)
             returned_data = self.save_data(full_data)
             self.status = "successed"
+            return returned_data
         except StopTaskException:
             self.status = "failed"
-            returned_data = None
         finally:
             print(f"{repr(self)} finished")
             self.close_driver(driver)
-            return returned_data
 
     def __repr__(self):
         return "<%s: name=%s, url=%s, status=%s>" % (

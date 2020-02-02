@@ -54,4 +54,5 @@ from flat_parser.sites.avito import GettingAvitoFlatInfo
 ])
 def test_get_address(item_text, expected):
     task = GettingAvitoFlatInfo('test', 'url')
-    assert task.parse_item(item_text) == expected
+    expected["link"] = 'url'
+    assert task.parse_item((item_text, 'url')) == expected

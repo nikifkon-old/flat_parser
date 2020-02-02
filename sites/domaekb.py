@@ -156,5 +156,9 @@ class GettingHouseInfo(Task):
 
     def log_error(self):
         with open(self.debug_file, 'a', encoding='utf-8') as file:
+            if self.prev_data:
+                link = self.prev_data.get('link')
+            else:
+                link = ''
             file.write(f"Address not found in domaekb.ru {self.url} "
-                       f"at {self.prev_data.get('link')}\n")
+                       f"at {link}\n")

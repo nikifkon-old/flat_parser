@@ -54,14 +54,14 @@ class GettingUPNFlatInfo(Task):
         data['address'] = data['address'].split(', ')[-1]
         data['kitchen_area'] = data['areas'].split(' / ')[-1]
         data['total_area'] = data['areas'].split(' / ')[0]
-        data.pop('areas')
-        data.pop('membership')
-        data.pop('rooms')
-        data.pop('house')
-        data.pop('year')
-        data.pop('walls')
-        data.pop('sell_conditions')
-        data.pop('video')
+        data.pop('areas', None)
+        data.pop('membership', None)
+        data.pop('rooms', None)
+        data.pop('house', None)
+        data.pop('year', None)
+        data.pop('walls', None)
+        data.pop('sell_conditions', None)
+        data.pop('video', None)
 
         if data.get("address") is None:
             with open(self.debug_file, 'a', encoding='utf-8') as file:

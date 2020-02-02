@@ -61,10 +61,18 @@ class GettingAvitoFlatInfo(Task):
         floor_mo = re.compile(r'(?P<floor>\d+)\/(?P<floor_num>\d+) эт.')
         metro_distance_mo = re.compile(r'(?P<distance>\d+(,\d+)?) км')
 
-        price = re.search(price_mo, item).group('price')
-        total_area = re.search(total_area_mo, item).group('area')
-        floor = re.search(floor_mo, item).group('floor')
-        floor_num = re.search(floor_mo, item).group('floor_num')
+        price = re.search(price_mo, item)
+        if price is not None:
+            price = price.group('price')
+        total_area = re.search(total_area_mo, item)
+        if total_area is not None:
+            total_area = total_area.group('area')
+        floor = re.search(floor_mo, item)
+        if floor is not None:
+            floor = floor.group('floor')
+        floor_num = re.search(floor_mo, item)
+        if floor_num is not None:
+            floor_num = floor_num.group('floor_num')
 
         metro_distance = None
         metro_distance_match = re.search(metro_distance_mo, item)
@@ -95,7 +103,10 @@ class GettingAvitoFlatInfo(Task):
 
         address = re.search(address_mo, item)
         if address is None:
-            address = item.split('\n')[-2]
+            try:
+                address = item.split('\n')[-2]
+            except:
+                address = None
             with open(self.debug_file, 'a', encoding='utf-8') as file:
                 file.write(('[Warning] Address dont match re.'
                             'We set address to `%s`,'
