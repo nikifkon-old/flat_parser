@@ -60,6 +60,7 @@ class GettingJulaFlatInfo(Task):
 
 class ParseJulaItem(Task):
     debug_file = "jula_debug.log"
+    output_file = "flat_info.csv"
 
     def __init__(self, *args, **kwargs):
         options = webdriver.ChromeOptions()
@@ -138,4 +139,4 @@ class ParseJulaItem(Task):
     def save_data(self, data):
         data = self.clean_data(data)
         data["link"] = self.url
-        return data
+        self.save_data_to_csv(data)

@@ -75,4 +75,4 @@ class GettingUPNFlatInfo(Task):
         return self.clean_data(data)
 
     def save_data(self, data):
-        return data
+        self.save_data_to_csv(data)

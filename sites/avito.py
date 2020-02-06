@@ -11,7 +11,7 @@ class GettingAvitoFlatInfo(Task):
     """ Get list of items urls for parse """
     scroll_sleep_time = 0.4
     load_more_button_label = "Загрузить еще"
-    file_path = 'flat_info.json'
+    file_path = 'flat_info.csv'
     debug_file = "flat_info_debug.log"
     max_count = 10
 
@@ -118,9 +118,4 @@ class GettingAvitoFlatInfo(Task):
         return address.strip()
 
     def save_data(self, data):
-        return data
-        # with open(self.file_path, 'a', encoding='utf-8') as file:
-        #     for item in data:
-        #         if item is not None:
-        #             json.dump(item, file, ensure_ascii=False, indent=4)
-        #             file.write(',\n')
+        self.save_data_to_csv(data)

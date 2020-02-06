@@ -1,6 +1,4 @@
-import os
 import re
-import csv
 from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.support.wait import WebDriverWait
@@ -145,14 +143,7 @@ class GettingHouseInfo(Task):
         return data
 
     def save_data(self, data):
-        need_header = False
-        if not os.path.exists(self.output_file):
-            need_header = True
-        with open(self.output_file, 'a', encoding='utf-8') as file:
-            writer = csv.writer(file)
-            if need_header:
-                writer.writerow(data.keys())
-            writer.writerow(data.values())
+        self.save_data_to_csv(data)
 
     def log_error(self):
         with open(self.debug_file, 'a', encoding='utf-8') as file:

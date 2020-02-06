@@ -1,4 +1,5 @@
 import os
+import csv
 import signal
 from random import choice
 from selenium import webdriver
@@ -97,6 +98,17 @@ class Task():
         """ Abstract method received data from `parse` method,
         and saves it in to a file """
         raise NotImplementedError('save_data method must be overrided')
+
+    def save_data_to_csv(self, data):
+        self.data = data
+        need_header = False
+        if not os.path.exists(self.output_file):
+            need_header = True
+        with open(self.output_file, 'a', encoding='utf-8') as file:
+            writer = csv.writer(file)
+            if need_header:
+                writer.writerow(data.keys())
+            writer.writerow(data.values())
 
     def run(self):
         self.status = "running"
