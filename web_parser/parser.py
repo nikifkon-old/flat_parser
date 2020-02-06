@@ -39,10 +39,15 @@ class Task():
     ]
     data = None
 
-    def __init__(self, name, url, driver_kwargs=None, driver_options=None):
+    def __init__(self, name, url, output_file=None, driver_kwargs=None, driver_options=None):
         self.name = name
         self.url = url
         self._status = "pending"
+        if output_file is not None:
+            self.output_file = output_file
+        else:
+            if not hasattr(self, 'output_file'):
+                self.output_file = 'info.csv'
 
         if driver_kwargs is not None:
             self._driver_kwargs = driver_kwargs

@@ -32,20 +32,36 @@ def main():
 
     if len(sys.argv) >= 2:
         manager = TaskManager()
+        if len(sys.argv) >= 3:
+            output_file = sys.argv[2]
+        else:
+            output_file = None
         if sys.argv[1] == 'avito':
-            task = manager.create_task(GettingAvitoFlatInfo, "avito", AVITO_URL)
+            task = manager.create_task(GettingAvitoFlatInfo, "avito",
+                                       AVITO_URL, output_file=output_file)
             task.run()
         elif sys.argv[1] == 'jula':
-            task = manager.create_task(GettingJulaFlatInfo, "jula", JULA_URL)
+            task = manager.create_task(GettingJulaFlatInfo, "jula", JULA_URL,
+                                       output_file=output_file)
             task.run()
         elif sys.argv[1] == 'upn':
-            task = manager.create_task(GettingUPNFlatInfo, "upn", UPN_URL)
+            task = manager.create_task(GettingUPNFlatInfo, "upn", UPN_URL,
+                                       output_file=output_file)
             task.run()
         elif sys.argv[1] == 'domaekb':
-            path = 'flat_info.csv'
-            prev_data = get_prev_data(path)
+            if len(sys.argv) >= 4:
+                output_file = sys.argv[3]
+            else:
+                output_file = None
+            if len(sys.argv) >= 3:
+                input_file = sys.argv[2]
+            else:
+                input_file = 'flat_info.csv'
+
+            prev_data = get_prev_data(input_file)
             if prev_data:
-                tasks = GettingHouseInfo.create_tasks_from_addresses(prev_data)
+                tasks = GettingHouseInfo.create_tasks_from_addresses(prev_data,
+                                                                     output_file=output_file)
                 with ProcessPoolExecutor(os.cpu_count()) as executor:
                     executor.map(run_task, tasks)
         else:
