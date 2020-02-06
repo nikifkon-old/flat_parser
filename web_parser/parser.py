@@ -99,6 +99,10 @@ class Task():
         and saves it in to a file """
         raise NotImplementedError('save_data method must be overrided')
 
+    def save_list_to_csv(self, data):
+        for row in data:
+            self.save_data_to_csv(row)
+
     def save_data_to_csv(self, data):
         self.data = data
         need_header = False

@@ -55,7 +55,7 @@ class GettingJulaFlatInfo(Task):
         return result
 
     def save_data(self, data):
-        return data
+        self.save_list_to_csv(data)
 
 
 class ParseJulaItem(Task):
@@ -139,4 +139,5 @@ class ParseJulaItem(Task):
     def save_data(self, data):
         data = self.clean_data(data)
         data["link"] = self.url
-        self.save_data_to_csv(data)
+        self.data = data
+        return data

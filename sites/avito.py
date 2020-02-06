@@ -11,7 +11,7 @@ class GettingAvitoFlatInfo(Task):
     """ Get list of items urls for parse """
     scroll_sleep_time = 0.4
     load_more_button_label = "Загрузить еще"
-    file_path = 'flat_info.csv'
+    output_file = 'flat_info.csv'
     debug_file = "flat_info_debug.log"
     max_count = 10
 
@@ -118,4 +118,4 @@ class GettingAvitoFlatInfo(Task):
         return address.strip()
 
     def save_data(self, data):
-        self.save_data_to_csv(data)
+        self.save_list_to_csv(data)
