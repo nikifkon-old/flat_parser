@@ -2,6 +2,7 @@ import os
 import csv
 import sys
 from time import time
+from configparser import ConfigParser
 from concurrent.futures import ProcessPoolExecutor
 from flat_parser.web_parser.parser import TaskManager
 from flat_parser.sites.avito import GettingAvitoFlatInfo
@@ -10,13 +11,17 @@ from flat_parser.sites.jula import GettingJulaFlatInfo
 from flat_parser.sites.upn import GettingUPNFlatInfo
 
 
-AVITO_URL = "https://m.avito.ru/ekaterinburg/kvartiry/prodam/vtorichka"
-JULA_URL = "https://youla.ru/ekaterinburg/nedvijimost/prodaja-kvartiri?attributes[realty_building_type][0]=166228"
-UPN_URL = "https://upn.ru/realty_eburg_flat_sale.htm#panel_search"
+CONFIG_FILE = "config.ini"
 
 
 def run_task(task):
     task.run()
+
+
+def read_config(config_file):
+    config = ConfigParser()
+    config.read(config_file)
+    return config
 
 
 def get_prev_data(path):
@@ -29,6 +34,7 @@ def get_prev_data(path):
 
 def main():
     start_time = time()
+    config = read_config(CONFIG_FILE)
 
     if len(sys.argv) >= 2:
         manager = TaskManager()
@@ -37,15 +43,24 @@ def main():
         else:
             output_file = None
         if sys.argv[1] == 'avito':
-            task = manager.create_task(GettingAvitoFlatInfo, "avito",
-                                       AVITO_URL, output_file=output_file)
+            url = config['avito'].get('url')
+            if url is None:
+                sys.exit('Config has not avito url')
+            task = manager.create_task(GettingAvitoFlatInfo, "avito", url,
+                                       output_file=output_file)
             task.run()
         elif sys.argv[1] == 'jula':
-            task = manager.create_task(GettingJulaFlatInfo, "jula", JULA_URL,
+            url = config['jula'].get('url')
+            if url is None:
+                sys.exit('Config has not jula url')
+            task = manager.create_task(GettingJulaFlatInfo, "jula", url,
                                        output_file=output_file)
             task.run()
         elif sys.argv[1] == 'upn':
-            task = manager.create_task(GettingUPNFlatInfo, "upn", UPN_URL,
+            url = config['upn'].get('url')
+            if url is None:
+                sys.exit('Config has not upn url')
+            task = manager.create_task(GettingUPNFlatInfo, "upn", url,
                                        output_file=output_file)
             task.run()
         elif sys.argv[1] == 'domaekb':
