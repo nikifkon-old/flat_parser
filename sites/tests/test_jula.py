@@ -1,5 +1,14 @@
 import pytest
-from flat_parser.sites.jula import ParseJulaItem
+from flat_parser.sites.jula import ParseJulaItem, GettingJulaFlatInfo
+
+
+@pytest.mark.parametrize('passed, expected', [
+    (2, 2),
+    (None, 1)
+])
+def test_jula_init(passed, expected):
+    task = GettingJulaFlatInfo("test", "test", scroll_count=passed)
+    assert task.scroll_count == expected
 
 
 def test_jula_item_parse():

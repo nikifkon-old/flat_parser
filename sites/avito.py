@@ -13,14 +13,14 @@ class GettingAvitoFlatInfo(Task):
     load_more_button_label = "Загрузить еще"
     output_file = 'flat_info.csv'
     debug_file = "flat_info_debug.log"
-    max_count = 10
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, scroll_count=None, **kwargs):
         options = webdriver.ChromeOptions()
         options.add_argument("headless")
         driver_kwargs = {
             'mobile': True
         }
+        self.scroll_count = scroll_count or 1
         super().__init__(*args, driver_options=options, driver_kwargs=driver_kwargs, **kwargs)
 
     def prepare(self, driver):
@@ -28,7 +28,7 @@ class GettingAvitoFlatInfo(Task):
         new = None
         load_more_button = None
         count = 0
-        while (last != new or load_more_button) and count < self.max_count:
+        while (last != new or load_more_button) and count < self.scroll_count:
             try:
                 load_more_button = driver.find_element_by_xpath("//div[.='%s']//span"
                                                                 % self.load_more_button_label)

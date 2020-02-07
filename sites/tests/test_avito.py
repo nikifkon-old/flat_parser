@@ -56,3 +56,12 @@ def test_get_address(item_text, expected):
     task = GettingAvitoFlatInfo('test', 'url')
     expected["link"] = 'url'
     assert task.parse_item((item_text, 'url')) == expected
+
+
+@pytest.mark.parametrize('passed, expected', [
+    (2, 2),
+    (None, 1)
+])
+def test_avito_init(passed, expected):
+    task = GettingAvitoFlatInfo("test", "test", scroll_count=passed)
+    assert task.scroll_count == expected

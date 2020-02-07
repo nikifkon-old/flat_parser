@@ -16,3 +16,12 @@ from flat_parser.sites.upn import GettingUPNFlatInfo
 def test_clean_data(data, expected):
     task = GettingUPNFlatInfo("test", "test_url")
     assert task.clean_data(data) == expected
+
+
+@pytest.mark.parametrize('passed, expected', [
+    (2, 2),
+    (None, 1)
+])
+def test_avito_init(passed, expected):
+    task = GettingUPNFlatInfo("test", "test", page_count=passed)
+    assert task.page_count == expected

@@ -15,11 +15,10 @@ def run_task(task):
 
 
 class GettingJulaFlatInfo(Task):
-    max_count = 5
-
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, scroll_count=None, **kwargs):
         options = webdriver.ChromeOptions()
         options.add_argument("headless")
+        self.scroll_count = scroll_count or 1
         super().__init__(*args, driver_options=options, **kwargs)
 
     def prepare(self, driver):
@@ -27,7 +26,7 @@ class GettingJulaFlatInfo(Task):
         new = None
         count = 0
         wait = WebDriverWait(driver, 10)
-        while last != new and count < self.max_count:
+        while last != new and count < self.scroll_count:
             last = new
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
             loader_xpath = "//aside[@data-component='Paginator']//div[@class='loader-colored']"

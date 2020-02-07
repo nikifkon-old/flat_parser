@@ -44,24 +44,30 @@ def main():
             output_file = None
         if sys.argv[1] == 'avito':
             url = config['avito'].get('url')
+            scroll_count = int(config['avito'].get('scroll_count'))
             if url is None:
                 sys.exit('Config has not avito url')
             task = manager.create_task(GettingAvitoFlatInfo, "avito", url,
-                                       output_file=output_file)
+                                       output_file=output_file,
+                                       scroll_count=scroll_count)
             task.run()
         elif sys.argv[1] == 'jula':
             url = config['jula'].get('url')
+            scroll_count = int(config['jula'].get('scroll_count'))
             if url is None:
                 sys.exit('Config has not jula url')
             task = manager.create_task(GettingJulaFlatInfo, "jula", url,
-                                       output_file=output_file)
+                                       output_file=output_file,
+                                       scroll_count=scroll_count)
             task.run()
         elif sys.argv[1] == 'upn':
             url = config['upn'].get('url')
+            page_count = int(config['upn'].get('page_count'))
             if url is None:
                 sys.exit('Config has not upn url')
             task = manager.create_task(GettingUPNFlatInfo, "upn", url,
-                                       output_file=output_file)
+                                       output_file=output_file,
+                                       page_count=page_count)
             task.run()
         elif sys.argv[1] == 'domaekb':
             if len(sys.argv) >= 4:

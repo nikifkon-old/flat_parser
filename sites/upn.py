@@ -14,9 +14,7 @@ class GettingUPNFlatInfo(Task):
                                                    'house', 'year',
                                                    'walls', 'sell_conditions',
                                                    'video'])
-        if page_count is None:
-            page_count = 10
-        self.page_count = page_count
+        self.page_count = page_count or 1
         super().__init__(*args, **kwargs)
 
     def prepare(self, driver):
