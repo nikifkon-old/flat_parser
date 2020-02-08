@@ -1,14 +1,14 @@
 .vscode/
 venv/
 
-data.*
-*.txt
+data/
 *.log
 *.json
 *.csv
-!requiremnts.txt
+!mobile_useragents.txt
 
 *.pyc
 __pycache__/
+*.egg-info
 
 .bs4_parser/
