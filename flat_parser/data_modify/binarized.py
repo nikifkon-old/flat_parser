@@ -28,9 +28,9 @@ class Binarized:
     def set_vars(self, _vars: list):
         self.vars = _vars
 
-    def write_result(self, path: str = None):
+    def write_result(self, path: str = None) -> str:
         if path is None:
-            path_without_ext = self.path.split('.')[:-1]
+            path_without_ext = ''.join(self.path.split('.')[:-1])
             path = f'{path_without_ext}_binarized.{self.file_type}'
         new_keys = self.binary_data()
         with open(path, 'w', encoding='utf-8') as file:
@@ -38,6 +38,7 @@ class Binarized:
             writter = csv.DictWriter(file, fieldnames=fieldnames, restval=0)
             writter.writeheader()
             writter.writerows(self.data)
+        return path
 
     def binary_data(self) -> list:
         new_keys = set()
