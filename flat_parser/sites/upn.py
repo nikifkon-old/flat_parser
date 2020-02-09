@@ -39,9 +39,11 @@ class GettingUPNFlatInfo(Task):
 
     def parse_page(self, driver):
         table_xpath = "//div[@id='panel_search']//table/tbody/tr"
+        loader_xpath = "//div[@id='loader']"
         wait = WebDriverWait(driver, 10)
         try:
             wait.until(EC.presence_of_all_elements_located((By.XPATH, table_xpath)))
+            wait.until(EC.invisibility_of_element((By.XPATH, loader_xpath)))
         except NoSuchElementException:
             return None
         trs = driver.find_elements_by_xpath("//div[@id='panel_search']//table/tbody/tr")
