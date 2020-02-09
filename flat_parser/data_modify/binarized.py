@@ -18,7 +18,12 @@ class Binarized:
         self.path = path
         self.file_type = file_type
         with open(path, encoding='utf-8') as file:
-            file.read()
+            reader = csv.DictReader(file)
+            self.keys = reader.fieldnames
+            if self.keys is None:
+                print(f'{path} is not valid or empty csv file')
+                self.keys = []
+            self.data = list(reader)
 
     def set_vars(self, _vars: list):
         self.vars = _vars
@@ -27,9 +32,21 @@ class Binarized:
         if path is None:
             path_without_ext = self.path.split('.')[:-1]
             path = f'{path_without_ext}_binarized.{self.file_type}'
-        with open(self.path, encoding='utf-8') as file:
-            data = csv.DictReader(file)
-            # logic
-            with open(path, 'w', encoding='utf-8') as file:
-                writter = csv.writer(file)
-                writter.writerows(data)
+        new_keys = self.binary_data()
+        with open(path, 'w', encoding='utf-8') as file:
+            fieldnames = [*self.keys, *new_keys]
+            writter = csv.DictWriter(file, fieldnames=fieldnames, restval=0)
+            writter.writeheader()
+            writter.writerows(self.data)
+
+    def binary_data(self) -> list:
+        new_keys = set()
+        for flat in self.data:
+            for var in self.vars:
+                if var in flat:
+                    value = flat[var]
+                    if value == '':
+                        continue
+                    new_keys.add(value)
+                    flat[value] = 1
+        return new_keys
