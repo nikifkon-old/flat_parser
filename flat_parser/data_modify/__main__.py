@@ -17,10 +17,8 @@ def main():
             input_file = sys.argv[2]
 
         if name == 'binarized':
-
             if input_file is None:
                 exit('Provide file you want to binarized')
-
             output_file = None
             if len(sys.argv) >= 4:
                 output_file = sys.argv[3]
@@ -29,9 +27,14 @@ def main():
             result_path = binary.write_result(output_file)
             print(f'Output file: {result_path}')
 
-        if name == 'clean_price':
+        elif name == 'clean_price':
             clean = DataCleaner(input_file)
             clean.clean_price()
+            clean.write_result()
+
+        elif name == 'clean_floors':
+            clean = DataCleaner(input_file)
+            clean.clean_floors()
             clean.write_result()
         else:
             print(f'Script {name} not found')

@@ -56,6 +56,15 @@ class GettingUPNFlatInfo(Task):
         data['total_area'] = data['areas'].split(' / ')[0]
         if data.get('price') is not None:
             data['price'] = data['price'].replace('.', '')
+        if data.get('floors') is not None:
+            try:
+                data['floor'] = data['floors'].split('/')[0].strip()
+                data['floor_count'] = data['floors'].split('/')[1].strip()
+            except IndexError:
+                data.pop('floor', None)
+                data.pop('floor_num', None)
+            finally:
+                data.pop('floors')
         data.pop('areas', None)
         data.pop('membership', None)
         data.pop('rooms', None)
