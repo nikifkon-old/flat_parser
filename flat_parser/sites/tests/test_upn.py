@@ -10,7 +10,18 @@ from flat_parser.sites.upn import GettingUPNFlatInfo
     {
         'address': 'Кошевого 32',
         'total_area': '23.4',
-        'kitchen_area': '5'
+        'kitchen_area': '5',
+    }),
+    ({
+        'address': 'Екатеринбург, Уктус, Кошевого 32',
+        'areas': '23.4 / 16 / 5',
+        'price': '123.123'
+    },
+    {
+        'address': 'Кошевого 32',
+        'total_area': '23.4',
+        'kitchen_area': '5',
+        'price': '123123'
     })
 ])
 def test_clean_data(data, expected):
