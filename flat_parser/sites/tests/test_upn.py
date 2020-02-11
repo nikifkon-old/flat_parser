@@ -7,8 +7,7 @@ from flat_parser.sites.upn import GettingUPNFlatInfo
         'address': 'Екатеринбург, Уктус, Кошевого 32',
         'areas': '23.4 / 16 / 5',
         'floors': ''
-    },
-    {
+    }, {
         'address': 'Кошевого 32',
         'total_area': '23.4',
         'kitchen_area': '5',
@@ -18,8 +17,7 @@ from flat_parser.sites.upn import GettingUPNFlatInfo
         'areas': '23.4 / 16 / 5',
         'price': '123.123',
         'floors': '1 / 5'
-    },
-    {
+    }, {
         'address': 'Кошевого 32',
         'total_area': '23.4',
         'kitchen_area': '5',
@@ -37,6 +35,6 @@ def test_clean_data(data, expected):
     (2, 2),
     (None, 1)
 ])
-def test_avito_init(passed, expected):
+def test_init(passed, expected):
     task = GettingUPNFlatInfo("test", "test", page_count=passed)
     assert task.page_count == expected

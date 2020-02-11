@@ -5,6 +5,7 @@ from concurrent.futures import ProcessPoolExecutor
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from flat_parser.web_parser.parser import Task
+from flat_parser.data_modify.utils import get_meter_price
 
 
 class GettingAvitoFlatInfo(Task):
@@ -118,4 +119,5 @@ class GettingAvitoFlatInfo(Task):
         return address.strip()
 
     def save_data(self, data):
+        data["meter_price"] = get_meter_price(data)
         self.save_list_to_csv(data)

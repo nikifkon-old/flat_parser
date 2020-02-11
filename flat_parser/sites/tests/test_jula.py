@@ -25,6 +25,7 @@ def test_jula_item_parse():
     assert data.get('total_area') == '48'
     assert data.get('kitchen_area') == '7'
     assert data.get('link') == url
+    assert data.get('meter_price') == '77083.333333'
 
 
 @pytest.mark.parametrize('data, expected', [

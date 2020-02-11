@@ -8,6 +8,7 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from flat_parser.web_parser.parser import Task, TaskManager, StopTaskException
+from flat_parser.data_modify.utils import get_meter_price
 
 
 def run_task(task):
@@ -138,5 +139,6 @@ class ParseJulaItem(Task):
     def save_data(self, data):
         data = self.clean_data(data)
         data["link"] = self.url
+        data["meter_price"] = get_meter_price(data)
         self.data = data
         return data
