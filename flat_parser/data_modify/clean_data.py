@@ -27,6 +27,10 @@ class DataCleaner:
         if path is None:
             path_without_ext = ''.join(self.path.split('.')[:-1])
             path = f'{path_without_ext}_cleaned.{self.file_type}'
+        self.clean_price()
+        new_keys, keys_to_remove = self.clean_floors()
+        self.keys.update(new_keys)
+        self.keys -= keys_to_remove
         with open(path, 'w', encoding='utf-8') as file:
             writter = csv.DictWriter(file, fieldnames=self.keys)
             writter.writeheader()
@@ -38,15 +42,18 @@ class DataCleaner:
             if 'price' in row:
                 row['price'] = row['price'].replace('.', '')
 
-    def clean_floors(self):
+    def clean_floors(self) -> (set, set):
+        new_keys = set()
+        keys_to_remove = set()
         for row in self.row:
             if 'floors' in row:
                 try:
                     row['floor'] = row['floors'].split('/')[0].strip()
                     row['floor_count'] = row['floors'].split('/')[1].strip()
-                    self.keys.update(('floor', 'floor_count'))
+                    new_keys.update(('floor', 'floor_count'))
                 except IndexError:
                     pass
                 finally:
                     row.pop('floors', None)
-        self.keys.remove('floors')
+        keys_to_remove.add('floors')
+        return new_keys, keys_to_remove
