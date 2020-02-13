@@ -10,7 +10,7 @@ from flat_parser.sites.avito import GettingAvitoFlatInfo
 from flat_parser.sites.domaekb import GettingHouseInfo
 from flat_parser.sites.jula import GettingJulaFlatInfo
 from flat_parser.sites.upn import GettingUPNFlatInfo
-from flat_parser import data_modify
+from flat_parser.data_modify import clean_data, binarized
 
 
 CONFIG_FILE = "config.ini"
@@ -48,6 +48,7 @@ def main():
     start_time = time()
     config = read_config(CONFIG_FILE)
     flat_parser_output = config['main'].get('default_output_flat_parsers')
+    house_parser_output = config['main'].get('default_output_house_parsers')
 
     if len(sys.argv) >= 2:
         name = sys.argv[1]
@@ -83,22 +84,29 @@ def main():
                                            page_count=page_count)
                 task.run()
             elif name == 'domaekb':
-                # get data
-                output_file = sys.argv[3] if len(sys.argv) >= 4 else None
+                output_file = sys.argv[3] if len(
+                    sys.argv) >= 4 else house_parser_output
                 input_file = sys.argv[2] if len(
                     sys.argv) >= 3 else flat_parser_output
+                parser_output = 'data/domaekb.csv'
 
+                # get data
                 prev_data = get_prev_data(input_file)
                 if prev_data:
                     tasks = GettingHouseInfo.create_tasks_from_addresses(prev_data,
-                                                                         output_file=output_file)
+                                                                         output_file=parser_output)
                     with ProcessPoolExecutor(os.cpu_count()) as executor:
                         executor.map(run_task, tasks)
+
                 # modify data. TODO: move to func and test it
                 need_binary = config['main'].get('need_binary')
-                cleaned = data_modify.clean_data.clean(input_file=output_file,
-                                                       varialbes=need_binary)
-                result = data_modify.binarized.binarized(input_file=cleaned)
+                var_list = None
+                if need_binary:
+                    var_list = need_binary.split(',')
+                cleaned = clean_data.clean(input_file=parser_output)
+                result = binarized.binarized(input_file=cleaned,
+                                             output_file=output_file,
+                                             variables=var_list)
                 print(f'Domaekb parser finished successful. Result file: {result}')
             # No match parser name
             else:

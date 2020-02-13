@@ -18,7 +18,9 @@ class GettingHouseInfo(Task):
     warning_file = 'house_info_warning.log'
     output_file = 'info.csv'
 
-    def __init__(self, *args, prev_data=None, **kwargs):
+    def __init__(self, *args, output_file=None, prev_data=None, **kwargs):
+        if output_file is not None:
+            self.output_file = output_file
         self.prev_data = prev_data
         capa = DesiredCapabilities.CHROME
         capa['pageLoadStrategy'] = "none"
