@@ -29,6 +29,7 @@ class DataCleaner:
             path = f'{path_without_ext}_cleaned.{self.file_type}'
         self.clean_price()
         new_keys, keys_to_remove = self.clean_floors()
+        self.clean_floats()
         self.keys.update(new_keys)
         self.keys -= keys_to_remove
         with open(path, 'w', encoding='utf-8') as file:
@@ -57,3 +58,11 @@ class DataCleaner:
                     row.pop('floors', None)
         keys_to_remove.add('floors')
         return new_keys, keys_to_remove
+
+    def clean_floats(self) -> set:
+        values = ['public_area', 'land_area']
+
+        for row in self.row:
+            for value in values:
+                if value in row:
+                    row[value] = row[value].replace(' ', '')

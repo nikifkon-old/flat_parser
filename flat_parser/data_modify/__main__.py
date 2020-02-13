@@ -15,29 +15,23 @@ def main():
         input_file = None
         if len(sys.argv) >= 3:
             input_file = sys.argv[2]
+        output_file = None
+        if len(sys.argv) >= 4:
+            output_file = sys.argv[3]
 
         if name == 'binarized':
             if input_file is None:
                 exit('Provide file you want to binarized')
-            output_file = None
-            if len(sys.argv) >= 4:
-                output_file = sys.argv[3]
             binary = Binarized(input_file, file_type='csv')
             binary.set_vars(VARS)
             result_path = binary.write_result(output_file)
-            print(f'Output file: {result_path}')
 
-        elif name == 'clean_price':
+        elif name == 'clean':
             clean = DataCleaner(input_file)
-            clean.clean_price()
-            clean.write_result()
-
-        elif name == 'clean_floors':
-            clean = DataCleaner(input_file)
-            clean.clean_floors()
-            clean.write_result()
+            result_path = clean.write_result(output_file)
         else:
             print(f'Script {name} not found')
+        print(f'Output file: {result_path}')
     else:
         print('Provide script name, please')
     print(f"Time: {round(time() - start_time, 2)} sec.")
