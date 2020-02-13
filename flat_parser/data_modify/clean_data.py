@@ -1,6 +1,12 @@
 import csv
 
 
+def clean(input_file, output_file=None):
+    clean = DataCleaner(input_file)
+    result_path = clean.write_result(output_file)
+    return result_path
+
+
 class DataCleaner:
     """
     Transform values in csv file to specific type.

@@ -1,6 +1,15 @@
 import csv
 
 
+def binarized(input_file, output_file=None, variables=None):
+    if variables is None:
+        print('vars for binarized is empty')
+    binary = Binarized(input_file, file_type='csv')
+    binary.set_vars(variables)
+    result_path = binary.write_result(output_file)
+    return result_path
+
+
 class Binarized:
     """
     For each nominal variables(in csv file) that taking more then

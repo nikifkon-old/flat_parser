@@ -1,9 +1,10 @@
 import sys
 from time import time
-from flat_parser.data_modify.binarized import Binarized
-from flat_parser.data_modify.clean_data import DataCleaner
+from flat_parser.data_modify.binarized import binarized
+from flat_parser.data_modify.clean_data import clean
 
 
+# TODO: read from config
 VARS = ['foundation_type', 'house_type', 'coating_type']
 
 
@@ -22,13 +23,11 @@ def main():
         if name == 'binarized':
             if input_file is None:
                 exit('Provide file you want to binarized')
-            binary = Binarized(input_file, file_type='csv')
-            binary.set_vars(VARS)
-            result_path = binary.write_result(output_file)
+            result_path = binarized(input_file, output_file, variables=VARS)
 
         elif name == 'clean':
-            clean = DataCleaner(input_file)
-            result_path = clean.write_result(output_file)
+            result_path = clean(input_file, output_file)
+
         else:
             print(f'Script {name} not found')
         print(f'Output file: {result_path}')

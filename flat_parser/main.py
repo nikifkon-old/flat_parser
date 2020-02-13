@@ -4,11 +4,13 @@ import sys
 from time import time
 from configparser import ConfigParser
 from concurrent.futures import ProcessPoolExecutor
+
 from flat_parser.web_parser.parser import TaskManager
 from flat_parser.sites.avito import GettingAvitoFlatInfo
 from flat_parser.sites.domaekb import GettingHouseInfo
 from flat_parser.sites.jula import GettingJulaFlatInfo
 from flat_parser.sites.upn import GettingUPNFlatInfo
+from flat_parser import data_modify
 
 
 CONFIG_FILE = "config.ini"
@@ -81,6 +83,7 @@ def main():
                                            page_count=page_count)
                 task.run()
             elif name == 'domaekb':
+                # get data
                 output_file = sys.argv[3] if len(sys.argv) >= 4 else None
                 input_file = sys.argv[2] if len(
                     sys.argv) >= 3 else flat_parser_output
@@ -91,6 +94,12 @@ def main():
                                                                          output_file=output_file)
                     with ProcessPoolExecutor(os.cpu_count()) as executor:
                         executor.map(run_task, tasks)
+                # modify data. TODO: move to func and test it
+                need_binary = config['main'].get('need_binary')
+                cleaned = data_modify.clean_data.clean(input_file=output_file,
+                                                       varialbes=need_binary)
+                result = data_modify.binarized.binarized(input_file=cleaned)
+                print(f'Domaekb parser finished successful. Result file: {result}')
             # No match parser name
             else:
                 sys.exit(f'`{name}` is not valid parser name')
