@@ -10,6 +10,7 @@ from flat_parser.sites.avito import GettingAvitoFlatInfo
 from flat_parser.sites.domaekb import GettingHouseInfo
 from flat_parser.sites.jula import GettingJulaFlatInfo
 from flat_parser.sites.upn import GettingUPNFlatInfo
+from flat_parser.sites.google_maps import GoogleMapsParser
 from flat_parser.data_modify import clean_data, binarized
 
 
@@ -28,7 +29,8 @@ def read_config(config_file):
 
 def get_prev_data(path):
     if path is None:
-        sys.exit(f'No input file passed to console or in config file: {CONFIG_FILE}')
+        sys.exit(
+            f'No input file passed to console or in config file: {CONFIG_FILE}')
     if os.path.exists(path):
         with open(path, encoding='utf-8') as file:
             dict_reader = csv.DictReader(file)
@@ -107,7 +109,24 @@ def main():
                 result = binarized.binarized(input_file=cleaned,
                                              output_file=output_file,
                                              variables=var_list)
-                print(f'Domaekb parser finished successful. Result file: {result}')
+                print(
+                    f'Domaekb parser finished successful. Result file: {result}')
+
+            # TODO: share tasks to levels(with same input and output files)
+            elif name == 'google_maps':
+                output_file = sys.argv[3] if len(
+                    sys.argv) >= 4 else house_parser_output
+                input_file = sys.argv[2] if len(
+                    sys.argv) >= 3 else flat_parser_output
+                parser_output = 'data/google_maps.csv'
+
+                prev_data = get_prev_data(input_file)
+
+                tasks = GoogleMapsParser.create_tasks_from_prev_data(prev_data,
+                                                                     output_file=parser_output)
+
+                for task in tasks:
+                    run_task(task)
             # No match parser name
             else:
                 sys.exit(f'`{name}` is not valid parser name')
