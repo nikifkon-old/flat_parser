@@ -28,8 +28,8 @@ def test_get_valid_google_address(prev_data, address):
 @pytest.mark.parametrize('prev_data, expected_result', [
     ({'address': 'ул. Куйбышева, 63', 'rest': 'test'},
      {'address': 'ул. Куйбышева, 63', 'rest': 'test',
-        'post_office_time': '6', 'metro_time': '6'})
+        'post_office_time': '16', 'metro_time': '6'})
 ])
 def test_runs(prev_data, expected_result):
-    task = GoogleMapsParser.create_task_from_prev_data(prev_data)
+    task = GoogleMapsParser.create_task_from_prev_data(prev_data, output_file="data/test.csv")
     assert expected_result == task.run()

@@ -94,12 +94,12 @@ class GoogleMapsParser(Task):
         input_.send_keys(self.main_post_office_address)
         input_.send_keys(Keys.RETURN)
 
-        switch_to_auto_btn_xpath = "//div[@aria-label='На автомобиле']/.."
-        switch_to_auto_btn = driver.find_element_by_xpath(switch_to_auto_btn_xpath)
-        switch_to_auto_btn.click()
+        switch_to_public_transport_btn_xpath = "//div[@aria-label='На общественном транспорте']/.."
+        switch_to_public_transport_btn = driver.find_element_by_xpath(switch_to_public_transport_btn_xpath)
+        switch_to_public_transport_btn.click()
 
         # get_few_time
-        few_time_xpath = f"//div[@id='section-directions-trip-1']//span[1]"
+        few_time_xpath = f"//div[@id='section-directions-trip-0']//div[@class='section-directions-trip-duration']"
         try:
             wait.until(EC.presence_of_element_located((By.XPATH, few_time_xpath)))
         except TimeoutException:
@@ -119,6 +119,7 @@ class GoogleMapsParser(Task):
         switch_to_auto_btn.click()
 
         few_time = None
+        prev_time = None
         # few_time_station = None
         for metro_station_address in self.metro_station_addresses:
             input_.clear()
@@ -133,7 +134,10 @@ class GoogleMapsParser(Task):
             metro_time = get_time_in_minutes_by_text(metro_time_text)
             if few_time is None or metro_time < few_time:
                 few_time = metro_time
-                # few_time_station = metro_station_address
+            elif metro_time > prev_time:
+                break
+            prev_time = metro_time
+            # few_time_station = metro_station_address
         return str(few_time)
 
     def save_data(self, data):

@@ -116,14 +116,14 @@ def main():
             elif name == 'google_maps':
                 parser_output = 'data/google_maps.csv'
                 output_file = sys.argv[3] if len(
-                    sys.argv) >= 4 else parser_output 
+                    sys.argv) >= 4 else parser_output
                 input_file = sys.argv[2] if len(
                     sys.argv) >= 3 else flat_parser_output
 
                 prev_data = get_prev_data(input_file)
 
                 tasks = GoogleMapsParser.create_tasks_from_prev_data(prev_data,
-                                                                     output_file=parser_output)
+                                                                     output_file=output_file)
 
                 for task in tasks:
                     run_task(task)
