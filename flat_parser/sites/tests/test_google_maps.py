@@ -18,7 +18,8 @@ def test_create_tasks():
     ({'test': '123'}, None),
     (None, None),
     ({}, None),
-    ({'address': 'ул. Начдива Онуфриева, 24к2'}, 'ул. Начдива Онуфриева, 24/2')
+    ({'address': 'ул. Начдива Онуфриева, 24к2'}, 'ул. Начдива Онуфриева, 24/2'),
+    ({'address': 'Июльская 41'}, 'Июльская 41')
 ])
 def test_get_valid_google_address(prev_data, address):
     assert address == GoogleMapsParser._get_valid_google_address(prev_data)

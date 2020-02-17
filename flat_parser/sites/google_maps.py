@@ -50,6 +50,12 @@ class GoogleMapsParser(Task):
     def _get_valid_google_address(prev_data):
         if prev_data is not None and 'address' in prev_data:
             address = prev_data['address']
+            num_re = re.compile(r'\d+к\d+')
+            match = re.search(num_re, address)
+            if match:
+                num = match.group()
+                slash_num = num.replace('к', '/')
+                address = address.replace(num, slash_num)
             return address
 
     def prepare(self, driver):
