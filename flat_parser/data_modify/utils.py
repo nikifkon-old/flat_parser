@@ -11,8 +11,12 @@ def get_meter_price(data: dict) -> str:
 
 
 def get_time_in_minutes_by_text(text):
-    if 'ч.' in text:
-        time = datetime.datetime.strptime(text, '%H ч. %M мин.')
-        return time.minute + time.hour * 60
-    time = datetime.datetime.strptime(text, '%M мин.')
-    return time.minute
+    try:
+        if 'ч.' in text:
+            time = datetime.datetime.strptime(text, '%H ч. %M мин.')
+            return time.minute + time.hour * 60
+        time = datetime.datetime.strptime(text, '%M мин.')
+        return time.minute
+    except ValueError:
+        print(f'[Error] Unable to get time in minutest - {text}')
+        return None

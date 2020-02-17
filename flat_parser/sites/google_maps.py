@@ -4,6 +4,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 
 from flat_parser.web_parser.parser import Task
 from flat_parser.data_modify.utils import get_time_in_minutes_by_text
@@ -30,6 +31,7 @@ class GoogleMapsParser(Task):
 
     def __init__(self, *args, prev_data=None, **kwargs):
         self.address = self._get_valid_google_address(prev_data)
+        self.prev_data = prev_data
 
         options = webdriver.ChromeOptions()
         options.add_argument("headless")
@@ -86,7 +88,7 @@ class GoogleMapsParser(Task):
     def get_post_office_time(self, driver):
         wait = WebDriverWait(driver, 10)
 
-        input_xpath = "//input[@id='searchboxinput']"
+        input_xpath = "//div[@id='directions-searchbox-1']//input"
         wait.until(EC.presence_of_element_located((By.XPATH, input_xpath)))
         input_ = driver.find_element_by_xpath(input_xpath)
         input_.send_keys(self.main_post_office_address)
@@ -97,16 +99,18 @@ class GoogleMapsParser(Task):
         switch_to_auto_btn.click()
 
         # get_few_time
-        direction_container = "//div[@id='section-directions-trip-1']"
-        few_time_xpath = f"{direction_container}//span"
-        wait.until(EC.presence_of_all_elements_located((By.XPATH, direction_container)))
+        few_time_xpath = f"//div[@id='section-directions-trip-1']//span[1]"
+        try:
+            wait.until(EC.presence_of_element_located((By.XPATH, few_time_xpath)))
+        except TimeoutException:
+            print(f'[Error] TimeoutException: address is {self.address}')
         few_time_text = driver.find_element_by_xpath(few_time_xpath).text
         return str(get_time_in_minutes_by_text(few_time_text))
 
     def get_metro_time(self, driver):
         wait = WebDriverWait(driver, 10)
 
-        input_xpath = "//input[@id='searchboxinput']"
+        input_xpath = "//div[@id='directions-searchbox-1']//input"
         wait.until(EC.presence_of_element_located((By.XPATH, input_xpath)))
         input_ = driver.find_element_by_xpath(input_xpath)
 

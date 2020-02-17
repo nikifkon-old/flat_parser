@@ -114,11 +114,11 @@ def main():
 
             # TODO: share tasks to levels(with same input and output files)
             elif name == 'google_maps':
+                parser_output = 'data/google_maps.csv'
                 output_file = sys.argv[3] if len(
-                    sys.argv) >= 4 else house_parser_output
+                    sys.argv) >= 4 else parser_output 
                 input_file = sys.argv[2] if len(
                     sys.argv) >= 3 else flat_parser_output
-                parser_output = 'data/google_maps.csv'
 
                 prev_data = get_prev_data(input_file)
 
