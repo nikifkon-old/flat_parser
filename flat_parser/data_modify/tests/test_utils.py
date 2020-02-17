@@ -13,7 +13,10 @@ def test_get_meter_price(data, meter_price):
 
 @pytest.mark.parametrize('text, time', [
     ('45 мин.', 45),
-    ('1 ч. 20 мин.', 80)
+    ('1 ч. 20 мин.', 80),
+    ('2 ч.', 120),
+    ('', 0),
+    (None, None)
 ])
 def test_get_time_in_minutes_by_text(text, time):
     assert time == get_time_in_minutes_by_text(text)
