@@ -7,6 +7,7 @@ def get_meter_price(data: dict) -> str:
             meter_price = float(data['price']) / float(data['total_area'])
             return str(round(meter_price, 6))
         except (TypeError, ValueError):
+            print(data)
             pass
 
 
@@ -26,6 +27,6 @@ def get_time_in_minutes_by_text(text):
         if need_date:
             result += time.day * 1440
         return result
-    except TypeError:
+    except (ValueError, TypeError):
         print(f'[Error] Unable to get time in minutest - {text}')
         return None

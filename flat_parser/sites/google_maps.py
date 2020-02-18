@@ -149,12 +149,13 @@ class GoogleMapsParser(Task):
                 continue
             metro_time_text = driver.find_element_by_xpath(few_time_xpath).text
             metro_time = get_time_in_minutes_by_text(metro_time_text)
-            if few_time is None or metro_time < few_time:
-                few_time = metro_time
-            elif metro_time > prev_time:
-                break
-            prev_time = metro_time
-            # few_time_station = metro_station_address
+            if metro_time:
+                if few_time is None or metro_time < few_time:
+                    few_time = metro_time
+                elif metro_time > prev_time:
+                    break
+                prev_time = metro_time
+                # few_time_station = metro_station_address
         return str(few_time)
 
     def save_data(self, data):
