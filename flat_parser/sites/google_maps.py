@@ -75,11 +75,13 @@ class GoogleMapsParser(Task):
         search_box.send_keys(self.address.lower())
 
         try:
-            wait.until(EC.element_to_be_clickable((By.XPATH, search_btn_xpath)))
+            wait.until(EC.element_to_be_clickable(
+                (By.XPATH, search_btn_xpath)))
             btn = driver.find_element_by_xpath(search_btn_xpath)
             btn.click()
 
-            wait.until(EC.element_to_be_clickable((By.XPATH, reverse_btn_xpath)))
+            wait.until(EC.element_to_be_clickable(
+                (By.XPATH, reverse_btn_xpath)))
             reverse_btn = driver.find_element_by_xpath(reverse_btn_xpath)
             reverse_btn.click()
         except (ElementClickInterceptedException, TimeoutException):
@@ -107,14 +109,17 @@ class GoogleMapsParser(Task):
         input_.send_keys(self.main_post_office_address.lower())
         input_.send_keys(Keys.RETURN)
 
-        switch_to_public_transport_btn_xpath = "//div[@aria-label='На общественном транспорте']/.."
-        switch_to_public_transport_btn = driver.find_element_by_xpath(switch_to_public_transport_btn_xpath)
-        switch_to_public_transport_btn.click()
+        public_transport_btn_xpath = "//div[@aria-label='На общественном транспорте']/.."
+        public_transport_btn = driver.find_element_by_xpath(
+            public_transport_btn_xpath)
+        public_transport_btn.click()
 
         # get_few_time
-        few_time_xpath = f"//div[@id='section-directions-trip-0']//div[@class='section-directions-trip-duration']"
+        few_time_xpath = (f"//div[@id='section-directions-trip-0']"
+                          f"//div[@class='section-directions-trip-duration']")
         try:
-            wait.until(EC.presence_of_element_located((By.XPATH, few_time_xpath)))
+            wait.until(EC.presence_of_element_located(
+                (By.XPATH, few_time_xpath)))
             few_time_text = driver.find_element_by_xpath(few_time_xpath).text
             return str(get_time_in_minutes_by_text(few_time_text))
         except TimeoutException:
@@ -129,7 +134,8 @@ class GoogleMapsParser(Task):
         input_ = driver.find_element_by_xpath(input_xpath)
 
         switch_to_feet_btn_xpath = "//div[@aria-label='Пешком']/.."
-        switch_to_auto_btn = driver.find_element_by_xpath(switch_to_feet_btn_xpath)
+        switch_to_auto_btn = driver.find_element_by_xpath(
+            switch_to_feet_btn_xpath)
         switch_to_auto_btn.click()
 
         few_time = None
@@ -141,10 +147,11 @@ class GoogleMapsParser(Task):
             input_.send_keys(Keys.RETURN)
 
             # get_few_time
-            direction_container = "//div[@data-trip-index='0']"
-            few_time_xpath = f"{direction_container}//div[@class='section-directions-trip-duration']"
+            container = "//div[@data-trip-index='0']"
+            few_time_xpath = f"{container}//div[@class='section-directions-trip-duration']"
             try:
-                wait.until(EC.presence_of_all_elements_located((By.XPATH, direction_container)))
+                wait.until(EC.presence_of_all_elements_located(
+                    (By.XPATH, container)))
             except TimeoutException:
                 continue
             metro_time_text = driver.find_element_by_xpath(few_time_xpath).text

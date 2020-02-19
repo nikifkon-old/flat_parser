@@ -1,4 +1,4 @@
-from flat_parser.__main__ import get_prev_data
+from flat_parser.main import get_prev_data
 
 
 def test_get_prev_data_dont_exist():

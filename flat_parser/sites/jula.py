@@ -29,19 +29,24 @@ class GettingJulaFlatInfo(Task):
         wait = WebDriverWait(driver, 10)
         while last != new and count < self.scroll_count:
             last = new
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
+            driver.execute_script(
+                "window.scrollTo(0, document.body.scrollHeight)")
             loader_xpath = "//aside[@data-component='Paginator']//div[@class='loader-colored']"
             try:
-                wait.until(EC.presence_of_element_located((By.XPATH, loader_xpath)))
-                wait.until(EC.invisibility_of_element_located((By.XPATH, loader_xpath)))
+                wait.until(EC.presence_of_element_located(
+                    (By.XPATH, loader_xpath)))
+                wait.until(EC.invisibility_of_element_located(
+                    (By.XPATH, loader_xpath)))
             except (NoSuchElementException, TimeoutException):
                 break
             new = driver.execute_script("return document.body.scrollHeight")
             count += 1
 
     def parse(self, driver):
-        container = driver.find_element_by_xpath("//section[@class='product_section']//div[@data-component='Board']/ul")
-        links_elements = container.find_elements_by_xpath("./li[@class='product_item']/a")
+        container = driver.find_element_by_xpath(
+            "//section[@class='product_section']//div[@data-component='Board']/ul")
+        links_elements = container.find_elements_by_xpath(
+            "./li[@class='product_item']/a")
         links = [element.get_attribute("href") for element in links_elements]
 
         data = self.parse_items(links)
@@ -59,8 +64,7 @@ class GettingJulaFlatInfo(Task):
 
 
 class ParseJulaItem(Task):
-    debug_file = "jula_debug.log"
-    output_file = "flat_info.csv"
+    debug_file = "data/jula_debug.log"
 
     def __init__(self, *args, **kwargs):
         options = webdriver.ChromeOptions()
@@ -71,16 +75,18 @@ class ParseJulaItem(Task):
         driver_kwargs = {
             "desired_capabilities": capa
         }
-        super().__init__(*args, driver_options=options, driver_kwargs=driver_kwargs, **kwargs)
+        super().__init__(*args, driver_options=options,
+                         driver_kwargs=driver_kwargs, **kwargs)
 
     def prepare(self, driver):
         dl_xpath = "//li[@data-test-block='Attributes']//dl[@data-test-component='DescriptionList']"
         wait = WebDriverWait(driver, 10)
         try:
-            wait.until(EC.presence_of_all_elements_located((By.XPATH, dl_xpath)))
+            wait.until(EC.presence_of_all_elements_located(
+                (By.XPATH, dl_xpath)))
             driver.execute_script("window.stop();")
-            dl = driver.find_element_by_xpath(dl_xpath)
-            load_more_btn = dl.find_element_by_xpath("./dd[last()]/button")
+            dl_element = driver.find_element_by_xpath(dl_xpath)
+            load_more_btn = dl_element.find_element_by_xpath("./dd[last()]/button")
             load_more_btn.click()
         except (NoSuchElementException, TimeoutException):
             with open(self.debug_file, 'a', encoding='utf-8') as file:
@@ -90,23 +96,25 @@ class ParseJulaItem(Task):
     def get_price(self, driver):
         price_blank = '\u205f'
         price_mo = re.compile(r'(?P<price>(\d+%s?)+)' % price_blank)
-        price_text = driver.find_element_by_xpath("//span[@data-test-component='Price']").text
+        price_text = driver.find_element_by_xpath(
+            "//span[@data-test-component='Price']").text
         price = re.search(price_mo, price_text)
         if price is not None:
             price = price.group('price')
             price_int = ''.join(price.split(price_blank))
             return price_int
-        else:
-            return ''
+        return ''
 
     def parse(self, driver):
         data = {}
 
         data["price"] = self.get_price(driver)
-        address = driver.find_element_by_xpath("//li[@data-test-component='ProductMap']//span")
+        address = driver.find_element_by_xpath(
+            "//li[@data-test-component='ProductMap']//span")
         data["address"] = address.text
 
-        dl = driver.find_element_by_xpath("//li[@data-test-block='Attributes']//dl[@data-test-component='DescriptionList']")
+        dl_element = driver.find_element_by_xpath(
+            "//li[@data-test-block='Attributes']//dl[@data-test-component='DescriptionList']")
         prop_list = [
             ('floor', 'Этаж'),
             ('floor_num', 'Этажность дома'),
@@ -114,12 +122,12 @@ class ParseJulaItem(Task):
             ('kitchen_area', 'Площадь кухни')
         ]
         for var_name, label in prop_list:
-            data[var_name] = self.get_dd_by_dt_text(dl, label)
+            data[var_name] = self.get_dd_by_dt_text(dl_element, label)
         return data
 
-    def get_dd_by_dt_text(self, dl, text):
+    def get_dd_by_dt_text(self, dl_element, text):
         try:
-            return dl.find_element_by_xpath(f".//dt[.='{text}']/following-sibling::dd").text
+            return dl_element.find_element_by_xpath(f".//dt[.='{text}']/following-sibling::dd").text
         except NoSuchElementException:
             with open(self.debug_file, 'a', encoding='utf-8') as file:
                 file.write(f'Unable to find {text} in {self.url}\n')

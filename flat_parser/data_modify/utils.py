@@ -7,7 +7,6 @@ def get_meter_price(data: dict) -> str:
             meter_price = float(data['price']) / float(data['total_area'])
             return str(round(meter_price, 6))
         except (TypeError, ValueError):
-            print(data)
             pass
 
 

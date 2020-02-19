@@ -26,6 +26,7 @@ class Binarized:
             raise FileNotFoundError('You must pass input_file to Binarized')
         self.path = path
         self.file_type = file_type
+        self.vars = None
         with open(path, encoding='utf-8') as file:
             reader = csv.DictReader(file)
             if reader.fieldnames is None:

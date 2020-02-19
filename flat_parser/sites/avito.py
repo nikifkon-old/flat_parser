@@ -1,19 +1,19 @@
-import re
 import os
-from time import sleep
+import re
 from concurrent.futures import ProcessPoolExecutor
+from time import sleep
+
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
-from flat_parser.web_parser.parser import Task
+
 from flat_parser.data_modify.utils import get_meter_price
+from flat_parser.web_parser.parser import Task
 
 
 class GettingAvitoFlatInfo(Task):
     """ Get list of items urls for parse """
     scroll_sleep_time = 0.4
-    load_more_button_label = "Загрузить еще"
-    output_file = 'flat_info.csv'
-    debug_file = "flat_info_debug.log"
+    debug_file = "data/flat_info_debug.log"
 
     def __init__(self, *args, scroll_count=None, **kwargs):
         options = webdriver.ChromeOptions()
@@ -22,30 +22,36 @@ class GettingAvitoFlatInfo(Task):
             'mobile': True
         }
         self.scroll_count = scroll_count or 1
-        super().__init__(*args, driver_options=options, driver_kwargs=driver_kwargs, **kwargs)
+        super().__init__(*args, driver_options=options,
+                         driver_kwargs=driver_kwargs, **kwargs)
 
     def prepare(self, driver):
         last = driver.execute_script("return document.body.scrollHeight")
         new = None
         load_more_button = None
         count = 0
+        load_more_button_label = "Загрузить еще"
+
         while (last != new or load_more_button) and count < self.scroll_count:
             try:
-                load_more_button = driver.find_element_by_xpath("//div[.='%s']//span"
-                                                                % self.load_more_button_label)
+                load_more_button = driver.find_element_by_xpath(
+                    f"//div[.='{load_more_button_label}']//span")
                 load_more_button.click()
             except NoSuchElementException:
                 load_more_button = None
             last = new
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
+            driver.execute_script(
+                "window.scrollTo(0, document.body.scrollHeight)")
             sleep(self.scroll_sleep_time)
             new = driver.execute_script("return document.body.scrollHeight")
             count += 1
 
     def parse(self, driver):
         result = []
-        container = driver.find_element_by_xpath(".//*[@data-marker='items/list']")
-        items = container.find_elements_by_xpath(".//*[@data-marker='item/link']/../..")
+        container = driver.find_element_by_xpath(
+            ".//*[@data-marker='items/list']")
+        items = container.find_elements_by_xpath(
+            ".//*[@data-marker='item/link']/../..")
         items_data = []
         for item in items:
             url = item.find_element_by_xpath(".//a").get_attribute('href')
@@ -91,6 +97,7 @@ class GettingAvitoFlatInfo(Task):
             "metro_distance": metro_distance,
             "link": url
         }
+        row["meter_price"] = get_meter_price(row)
         return row
 
     def get_address(self, item):
@@ -106,7 +113,7 @@ class GettingAvitoFlatInfo(Task):
         if address is None:
             try:
                 address = item.split('\n')[-2]
-            except:
+            except KeyError:
                 address = None
             with open(self.debug_file, 'a', encoding='utf-8') as file:
                 file.write(('[Warning] Address dont match re.'
@@ -119,5 +126,4 @@ class GettingAvitoFlatInfo(Task):
         return address.strip()
 
     def save_data(self, data):
-        data["meter_price"] = get_meter_price(data)
         self.save_list_to_csv(data)

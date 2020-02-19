@@ -1,8 +1,8 @@
 import sys
 from time import time
+
 from flat_parser.data_modify.binarized import binarized
 from flat_parser.data_modify.clean_data import clean
-
 
 # TODO: read from config
 VARS = ['foundation_type', 'house_type', 'coating_type']

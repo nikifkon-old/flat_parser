@@ -1,7 +1,8 @@
-import os
 import csv
+import os
 import signal
 from random import choice
+
 from selenium import webdriver
 
 
