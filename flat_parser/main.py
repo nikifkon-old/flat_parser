@@ -1,4 +1,5 @@
 import csv
+import logging
 import os
 import sys
 from concurrent.futures import ProcessPoolExecutor
@@ -12,6 +13,7 @@ from flat_parser.sites.google_maps import GoogleMapsParser
 from flat_parser.sites.jula import GettingJulaFlatInfo
 from flat_parser.sites.upn import GettingUPNFlatInfo
 from flat_parser.web_parser.parser import TaskManager
+
 
 CONFIG_FILE = "config.ini"
 
@@ -79,6 +81,7 @@ def run_flat_parser_from_command_line(name, config):
                                    output_file=output_file,
                                    page_count=page_count)
         task.run()
+    print(f'Output file: {output_file}')
 
 
 def run_house_parser_from_command_line(name, config):
@@ -91,15 +94,13 @@ def run_house_parser_from_command_line(name, config):
 
     prev_data = get_prev_data(input_file)
     if name == 'domaekb':
-
         if prev_data:
             tasks = GettingHouseInfo.create_tasks_from_addresses(prev_data,
                                                                  output_file=output_file)
 
-
             with ProcessPoolExecutor(os.cpu_count()) as executor:
                 executor.map(run_task, tasks)
-            print(f'Domaekb parser finished successful. Result file: {output_file}')
+    print(f'Output file: {output_file}')
 
 
 def run_location_parser_from_command_line(name, config):
@@ -116,8 +117,9 @@ def run_location_parser_from_command_line(name, config):
     if name == 'google_maps':
         tasks = GoogleMapsParser.create_tasks_from_prev_data(prev_data,
                                                              output_file=output_file)
-        for task in tasks:
-            run_task(task)
+        with ProcessPoolExecutor(int(os.cpu_count() / 2)) as executor:
+            executor.map(run_task, tasks)
+    print(f'Output file: {output_file}')
 
 
 def run_data_mod_from_command_line(name, config):
@@ -134,14 +136,15 @@ def run_data_mod_from_command_line(name, config):
         if vars_need_be_binary:
             var_list = vars_need_be_binary.split(',')
 
-        result = binarized.binarized(input_file=input_file,
-                                     output_file=output_file,
-                                     variables=var_list)
-        print(f'Output: {result}')
+        binarized.binarized(input_file=input_file,
+                            output_file=output_file,
+                            variables=var_list)
+    print(f'Output file: {output_file}')
 
 
 def main():
     start_time = time()
+    logging.basicConfig(filename='data/main.log', level=logging.DEBUG)
     config = read_config(CONFIG_FILE)
 
     if len(sys.argv) >= 2:
@@ -161,10 +164,11 @@ def main():
                 run_data_mod_from_command_line(name, config)
 
             else:
-                # No match parser name
-                sys.exit(f'`{name}` is not valid parser name')
+                # Doesnt match parser name
+                logging.error('%s is not a valid parser name', name)
         except NoUrlException as exc:
-            sys.exit(f'{exc} url is not found in cofing file: {CONFIG_FILE}')
+            logging.error(
+                '%s url is not found in config file: %s', exc, CONFIG_FILE)
     else:
         print('Please pass parser name')
-    print(f"Time: {round(time() - start_time, 2)} sec.")
+    print("Time: %s sec." % round(time() - start_time, 2))
