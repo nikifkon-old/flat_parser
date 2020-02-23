@@ -7,7 +7,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from flat_parser.web_parser.parser import Task, TaskManager, StopTaskException
+from flat_parser.web_parser.parser import Task, StopTaskException
 from flat_parser.data_modify.utils import get_meter_price
 
 
@@ -15,7 +15,7 @@ def run_task(task):
     return task.run()
 
 
-class GettingJulaFlatInfo(Task):
+class YoulaParser(Task):
     def __init__(self, *args, scroll_count=None, **kwargs):
         options = webdriver.ChromeOptions()
         options.add_argument("headless")
@@ -53,8 +53,7 @@ class GettingJulaFlatInfo(Task):
         return data
 
     def parse_items(self, links):
-        manager = TaskManager()
-        tasks = manager.create_tasks(ParseJulaItem, "pasre_jula_item", links)
+        tasks = [YoulaItemParser("youla_item", link) for link in links]
         with ProcessPoolExecutor(os.cpu_count()) as executor:
             result = executor.map(run_task, tasks)
         return result
@@ -63,7 +62,7 @@ class GettingJulaFlatInfo(Task):
         self.save_list_to_csv(data)
 
 
-class ParseJulaItem(Task):
+class YoulaItemParser(Task):
     debug_file = "data/jula_debug.log"
 
     def __init__(self, *args, **kwargs):

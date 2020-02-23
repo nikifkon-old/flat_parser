@@ -1,5 +1,5 @@
 import pytest
-from flat_parser.sites.upn import GettingUPNFlatInfo
+from flat_parser.sites.upn import UPNParser
 
 
 @pytest.mark.parametrize('tr_text, expected', [
@@ -47,7 +47,7 @@ from flat_parser.sites.upn import GettingUPNFlatInfo
     )
 ])
 def test_clean_data(tr_text, expected):
-    task = GettingUPNFlatInfo("test", "test_url")
+    task = UPNParser("test", "test_url")
     data = task.tr_namedturple(*tr_text)._asdict()
     assert task.clean_data(data) == expected
 
@@ -57,5 +57,5 @@ def test_clean_data(tr_text, expected):
     (None, 1)
 ])
 def test_init(passed, expected):
-    task = GettingUPNFlatInfo("test", "test", page_count=passed)
+    task = UPNParser("test", "test", page_count=passed)
     assert task.page_count == expected

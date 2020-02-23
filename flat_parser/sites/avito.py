@@ -10,7 +10,7 @@ from flat_parser.data_modify.utils import get_meter_price
 from flat_parser.web_parser.parser import Task
 
 
-class GettingAvitoFlatInfo(Task):
+class AvitoParser(Task):
     """ Get list of items urls for parse """
     scroll_sleep_time = 0.4
     debug_file = "data/flat_info_debug.log"

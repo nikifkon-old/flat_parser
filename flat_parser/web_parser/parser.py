@@ -6,11 +6,6 @@ from random import choice
 from selenium import webdriver
 
 
-def pool_initializer():
-    """Ignore CTRL+C in the worker process."""
-    signal.signal(signal.SIGINT, signal.SIG_IGN)
-
-
 class StopTaskException(Exception):
     pass
 
@@ -18,7 +13,8 @@ class StopTaskException(Exception):
 class Driver(webdriver.Chrome):
     def __init__(self, *args, mobile=False, options=None, **kwargs):
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        self.useragent_list_path = os.path.join(current_dir, "mobile_useragents.txt")
+        self.useragent_list_path = os.path.join(
+            current_dir, "mobile_useragents.txt")
 
         if options is None:
             options = webdriver.ChromeOptions()
@@ -40,7 +36,8 @@ class Task():
     ]
     data = None
 
-    def __init__(self, name, url, output_file=None, driver_kwargs=None, driver_options=None):
+    def __init__(self, name, url, output_file=None, driver_kwargs=None,
+                 driver_options=None, prev_data=None):
         self.name = name
         self.url = url
         self._status = "pending"
@@ -48,13 +45,20 @@ class Task():
             self.output_file = output_file
         else:
             if not hasattr(self, 'output_file'):
-                self.output_file = 'info.csv'
+                self.output_file = 'data/info.csv'
 
         if driver_kwargs is not None:
             self._driver_kwargs = driver_kwargs
         else:
             self._driver_kwargs = {}
+
+        self.prev_data = prev_data
         self._driver_options = driver_options
+
+    @classmethod
+    def create_tasks_with_prev_data(cls, *args, prev_data=None, **kwargs):
+        for data in prev_data:
+            yield cls(*args, prev_data=data, **kwargs)
 
     def init_driver(self):
         return Driver(options=self._driver_options, **self._driver_kwargs)
@@ -68,7 +72,7 @@ class Task():
         if new in self.statuses:
             self._status = new
         else:
-            raise Exception('Status %s is not in allowed statuses. '\
+            raise Exception('Status %s is not in allowed statuses. '
                             'Maybe you mean one of them: [%s]' % (new, ', '.join(self.statuses)))
 
     def open_driver(self):
@@ -140,21 +144,3 @@ class Task():
     def __repr__(self):
         return "<%s: name=%s, url=%s, status=%s>" % (
             self.__class__.__name__, self.name, self.url, self.status)
-
-
-class TaskManager():
-    tasks = {}
-
-    def create_task(self, task_class, name, url, *args, **kwargs):
-        task_label = f'{name} url: {url}'
-        task = task_class(name, url, *args, **kwargs)
-        self.tasks[task_label] = task
-        return task
-
-    def create_tasks(self, task_class, name, urls, *args, **kwargs):
-        for url in urls:
-            task = self.create_task(task_class, name, url, *args, **kwargs)
-            yield task
-
-    def __repr__(self):
-        return "<%s>" % self.__class__.__name__

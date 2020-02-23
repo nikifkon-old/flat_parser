@@ -1,5 +1,5 @@
 import pytest
-from flat_parser.sites.domaekb import GettingHouseInfo
+from flat_parser.sites.domaekb import DomaekbParser
 
 
 @pytest.fixture
@@ -11,7 +11,7 @@ def urls_cases():
     }
 
 
-class GettingHouseInfoLog(GettingHouseInfo):
+class DomaekbParserLog(DomaekbParser):
     def save_data(self, data):
         super().save_data(data)
         return data
@@ -25,5 +25,5 @@ def create_house_info_task(urls_cases):
         except KeyError:
             assert False, "Invalid url case"
         name = "test_task"
-        return GettingHouseInfoLog(name, url)
+        return DomaekbParserLog(name, url)
     return create_task

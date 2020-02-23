@@ -33,23 +33,11 @@ class GoogleMapsParser(Task):
 
     def __init__(self, *args, prev_data=None, **kwargs):
         self.address = self._get_valid_google_address(prev_data)
-        self.prev_data = prev_data
         self._refreshed = False
 
         options = webdriver.ChromeOptions()
         options.add_argument("headless")
-        super().__init__(*args, driver_options=options, **kwargs)
-
-    @classmethod
-    def create_task_from_prev_data(cls, prev_data, *args, **kwargs):
-        name = "google_maps"
-        url = "https://google.com/maps"
-        return cls(name, url, *args, prev_data=prev_data, **kwargs)
-
-    @classmethod
-    def create_tasks_from_prev_data(cls, prev_data, *args, **kwargs):
-        for data in prev_data:
-            yield cls.create_task_from_prev_data(*args, prev_data=data, **kwargs)
+        super().__init__(*args, driver_options=options, prev_data=prev_data, **kwargs)
 
     @staticmethod
     def _get_valid_google_address(prev_data):

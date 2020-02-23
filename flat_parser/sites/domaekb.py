@@ -14,14 +14,13 @@ NBSP = " "
 HOUSE_INFO_URL = "https://domaekb.ru/search?adres="
 
 
-class GettingHouseInfo(Task):
+class DomaekbParser(Task):
     debug_file = 'data/house_info_debug.log'
     warning_file = 'data/house_info_warning.log'
 
-    def __init__(self, *args, output_file=None, prev_data=None, **kwargs):
+    def __init__(self, *args, output_file=None, **kwargs):
         if output_file is not None:
             self.output_file = output_file
-        self.prev_data = prev_data
         capa = DesiredCapabilities.CHROME
         capa['pageLoadStrategy'] = "none"
         driver_kwargs = {

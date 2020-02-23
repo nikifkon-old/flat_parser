@@ -8,12 +8,11 @@ from time import time
 
 from flat_parser.data_modify import binarized
 from flat_parser.data_modify.clean_data import clean
-from flat_parser.sites.avito import GettingAvitoFlatInfo
-from flat_parser.sites.domaekb import GettingHouseInfo
+from flat_parser.sites.avito import AvitoParser
+from flat_parser.sites.domaekb import DomaekbParser
 from flat_parser.sites.google_maps import GoogleMapsParser
-from flat_parser.sites.jula import GettingJulaFlatInfo
-from flat_parser.sites.upn import GettingUPNFlatInfo
-from flat_parser.web_parser.parser import TaskManager
+from flat_parser.sites.youla import YoulaParser
+from flat_parser.sites.upn import UPNParser
 
 
 CONFIG_FILE = "config.ini"
@@ -50,8 +49,6 @@ class NoUrlException(Exception):
 
 
 def run_flat_parser_from_command_line(name, config):
-    manager = TaskManager()
-
     flat_parser_output = config['main'].get('default_output_flat_parsers')
     output_file = sys.argv[2] if len(sys.argv) >= 3 else flat_parser_output
 
@@ -60,27 +57,27 @@ def run_flat_parser_from_command_line(name, config):
         scroll_count = int(config['avito'].get('scroll_count'))
         if url is None:
             raise NoUrlException(name)
-        task = manager.create_task(GettingAvitoFlatInfo, "avito", url,
-                                   output_file=output_file,
-                                   scroll_count=scroll_count)
+
+        task = AvitoParser("avito_parser", url, output_file=output_file,
+                           scroll_count=scroll_count)
         task.run()
     elif name == 'jula':
         url = config['jula'].get('url')
         scroll_count = int(config['jula'].get('scroll_count'))
         if url is None:
             raise NoUrlException(name)
-        task = manager.create_task(GettingJulaFlatInfo, "jula", url,
-                                   output_file=output_file,
-                                   scroll_count=scroll_count)
+        task = YoulaParser("jula", url,
+                           output_file=output_file,
+                           scroll_count=scroll_count)
         task.run()
     elif name == 'upn':
         url = config['upn'].get('url')
         page_count = int(config['upn'].get('page_count'))
         if url is None:
             raise NoUrlException(name)
-        task = manager.create_task(GettingUPNFlatInfo, "upn", url,
-                                   output_file=output_file,
-                                   page_count=page_count)
+        task = UPNParser("upn", url,
+                         output_file=output_file,
+                         page_count=page_count)
         task.run()
     print(f'Output file: {output_file}')
 
@@ -96,8 +93,8 @@ def run_house_parser_from_command_line(name, config):
     prev_data = get_prev_data(input_file)
     if name == 'domaekb':
         if prev_data:
-            tasks = GettingHouseInfo.create_tasks_from_addresses(prev_data,
-                                                                 output_file=output_file)
+            tasks = DomaekbParser.create_tasks_from_addresses(prev_data,
+                                                              output_file=output_file)
 
             with ProcessPoolExecutor(os.cpu_count()) as executor:
                 executor.map(run_task, tasks)
@@ -105,6 +102,7 @@ def run_house_parser_from_command_line(name, config):
 
 
 def run_location_parser_from_command_line(name, config):
+    google_maps_url = config['google_maps'].get('url')
     input_file = sys.argv[2] if len(sys.argv) >= 3 else exit(
         'You must provide input file')
 
@@ -116,8 +114,10 @@ def run_location_parser_from_command_line(name, config):
     prev_data = get_prev_data(input_file)
 
     if name == 'google_maps':
-        tasks = GoogleMapsParser.create_tasks_from_prev_data(prev_data,
-                                                             output_file=output_file)
+        tasks = GoogleMapsParser.\
+            create_tasks_with_prev_data('google_maps_parser', google_maps_url,
+                                        prev_data=prev_data,
+                                        output_file=output_file)
         with ProcessPoolExecutor(int(os.cpu_count() / 2)) as executor:
             executor.map(run_task, tasks)
     print(f'Output file: {output_file}')
@@ -173,7 +173,8 @@ def main():
                 # Doesnt match parser name
                 logging.error('%s is not a valid parser name', name)
         except NoUrlException as exc:
-            print('%s url is not found in config file: %s' % (exc, CONFIG_FILE))
+            print('%s url is not found in config file: %s' %
+                  (exc, CONFIG_FILE))
     else:
         print('Please pass parser name')
     print("Time: %s sec." % round(time() - start_time, 2))

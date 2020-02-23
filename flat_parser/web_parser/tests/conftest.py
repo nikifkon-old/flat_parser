@@ -1,5 +1,5 @@
 import pytest
-from flat_parser.web_parser.parser import Task, TaskManager
+from flat_parser.web_parser.parser import Task
 
 
 @pytest.fixture
@@ -26,13 +26,10 @@ class ExampleTask(Task):
         assert data == self.test_data
 
 @pytest.fixture
-def custom_task():
+def custom_task_class():
     return ExampleTask
 
-@pytest.fixture
-def task(custom_task, task_data):
-    return custom_task(*task_data.values())
 
 @pytest.fixture
-def manager():
-    return TaskManager()
+def task(custom_task_class, task_data):
+    return custom_task_class(*task_data.values())

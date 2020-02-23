@@ -13,7 +13,7 @@ from flat_parser.data_modify.utils import get_meter_price
 
 
 
-class GettingUPNFlatInfo(Task):
+class UPNParser(Task):
     def __init__(self, *args, page_count=None, **kwargs):
         self.tr_namedturple = namedtuple('Flat', ['membership', 'rooms',
                                                   'address', 'areas',

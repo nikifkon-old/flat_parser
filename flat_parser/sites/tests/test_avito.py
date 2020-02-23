@@ -1,5 +1,5 @@
 import pytest
-from flat_parser.sites.avito import GettingAvitoFlatInfo
+from flat_parser.sites.avito import AvitoParser
 
 
 @pytest.mark.parametrize('item_text, expected', [
@@ -53,7 +53,7 @@ from flat_parser.sites.avito import GettingAvitoFlatInfo
             'metro_distance': None}]
 ])
 def test_get_address(item_text, expected):
-    task = GettingAvitoFlatInfo('test', 'url')
+    task = AvitoParser('test', 'url')
     expected["link"] = 'url'
     assert task.parse_item((item_text, 'url')) == expected
 
@@ -63,5 +63,5 @@ def test_get_address(item_text, expected):
     (None, 1)
 ])
 def test_avito_init(passed, expected):
-    task = GettingAvitoFlatInfo("test", "test", scroll_count=passed)
+    task = AvitoParser("test", "test", scroll_count=passed)
     assert task.scroll_count == expected

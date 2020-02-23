@@ -1,17 +1,18 @@
+from collections.abc import Iterable
+
 import pytest
 from flat_parser.sites.google_maps import GoogleMapsParser
 
 
 def test_init():
-    pass
-
-
-def test_create_task():
-    pass
-
-
-def test_create_tasks():
-    pass
+    task = GoogleMapsParser('test_name', 'test_url',
+                            output_file='test_output.csv', prev_data={})
+    assert task.name == 'test_name'
+    assert task.url == 'test_url'
+    assert task.output_file == 'test_output.csv'
+    assert task.prev_data == {}
+    assert task.address is None
+    assert task._refreshed == False
 
 
 @pytest.mark.parametrize('prev_data, address', [
@@ -31,5 +32,6 @@ def test_get_valid_google_address(prev_data, address):
         'post_office_time': '16', 'metro_time': '6'})
 ])
 def test_runs(prev_data, expected_result):
-    task = GoogleMapsParser.create_task_from_prev_data(prev_data, output_file="data/test.csv")
+    task = GoogleMapsParser('test_name', 'https://google.com/maps',
+                            prev_data=prev_data, output_file="data/test.csv")
     assert expected_result == task.run()

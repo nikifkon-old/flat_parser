@@ -1,6 +1,6 @@
 from collections.abc import Iterator
 import pytest
-from flat_parser.sites.tests.conftest import GettingHouseInfoLog
+from flat_parser.sites.tests.conftest import DomaekbParserLog
 from flat_parser.sites.domaekb import HOUSE_INFO_URL
 
 
@@ -16,7 +16,7 @@ def check_data(data):
     assert data.get('house_area')
     assert data.get('playground')
     assert data.get('sport_ground')
-    data['land_area']
+    data.get('land_area')
     assert data.get('porch_count')
     assert data.get('people_count')
     assert data.get('url') is None
@@ -28,7 +28,7 @@ def test_create_task_from_address():
         'address': 'пр Академика Сахарова , 2'
     }
 
-    task = GettingHouseInfoLog.create_task_from_address(prev_data)
+    task = DomaekbParserLog.create_task_from_address(prev_data)
     assert task
     assert HOUSE_INFO_URL in task.url
 
@@ -44,7 +44,7 @@ def test_create_tasks_from_addresses():
         },
         None
     ]
-    tasks = GettingHouseInfoLog.create_tasks_from_addresses(prev_datas)
+    tasks = DomaekbParserLog.create_tasks_from_addresses(prev_datas)
     assert tasks
     assert isinstance(tasks, Iterator)
     assert len(list(tasks)) == 2
@@ -77,14 +77,14 @@ def test_get_normalize_address(create_house_info_task, address, expected):
 def test_ok(create_house_info_task):
     task = create_house_info_task("ok")
     data = task.run()
-    task.status == "successed"
+    assert task.status == "successed"
     check_data(data)
 
 
 def test_many(create_house_info_task):
     task = create_house_info_task("many")
     data = task.run()
-    task.status == "successed"
+    assert task.status == "successed"
     check_data(data)
 
 
