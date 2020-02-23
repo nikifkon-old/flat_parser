@@ -47,46 +47,49 @@ class AvitoParser(Task):
             count += 1
 
     def parse(self, driver):
-        result = []
         container = driver.find_element_by_xpath(
             ".//*[@data-marker='items/list']")
         items = container.find_elements_by_xpath(
             ".//*[@data-marker='item/link']/../..")
-        items_data = []
+        args = []
         for item in items:
             url = item.find_element_by_xpath(".//a").get_attribute('href')
-            items_data.append((item.text, url))
+            args.append((item.text, url))
+        return self.run_multi_proccess(self.parse_item, args)
+
+    def run_multi_proccess(self, func, args):
+        result = []
         with ProcessPoolExecutor(os.cpu_count()) as executor:
-            result = executor.map(self.parse_item, items_data)
+            result = executor.map(func, args)
         return result
 
-    def parse_item(self, data):
-        item = data[0]
-        url = data[1]
+    def parse_item(self, args):
+        string, url = args
+        row = self.parse_string(string)
+        row["link"] = url
+        row["meter_price"] = get_meter_price(row)
+        return row
+
+    def parse_string(self, string):
         price_mo = re.compile(r'(?P<price>(\d+ ?)+).руб\.')
         total_area_mo = re.compile(r'(?P<area>\d+(\.)?\d) м²')
         floor_mo = re.compile(r'(?P<floor>\d+)\/(?P<floor_num>\d+) эт.')
-        metro_distance_mo = re.compile(r'(?P<distance>\d+(,\d+)?) км')
 
-        price = re.search(price_mo, item)
+        price = re.search(price_mo, string)
         if price is not None:
             price = price.group('price')
-        total_area = re.search(total_area_mo, item)
+            price = price.replace(' ', '')
+        total_area = re.search(total_area_mo, string)
         if total_area is not None:
             total_area = total_area.group('area')
-        floor = re.search(floor_mo, item)
+        floor = re.search(floor_mo, string)
         if floor is not None:
             floor = floor.group('floor')
-        floor_num = re.search(floor_mo, item)
+        floor_num = re.search(floor_mo, string)
         if floor_num is not None:
             floor_num = floor_num.group('floor_num')
 
-        metro_distance = None
-        metro_distance_match = re.search(metro_distance_mo, item)
-        if metro_distance_match is not None:
-            metro_distance = metro_distance_match.group('distance')
-
-        address = self.get_address(item)
+        address = self.get_address(string)
 
         row = {
             "price": price,
@@ -94,10 +97,7 @@ class AvitoParser(Task):
             "total_area": total_area,
             "floor": floor,
             "floor_num": floor_num,
-            "metro_distance": metro_distance,
-            "link": url
         }
-        row["meter_price"] = get_meter_price(row)
         return row
 
     def get_address(self, item):
