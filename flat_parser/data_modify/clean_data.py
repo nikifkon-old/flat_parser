@@ -16,6 +16,7 @@ class DataCleaner:
     cleaner.clean_price()
     cleaner.write_result()
     """
+
     def __init__(self, path: str = None, file_type: str = 'csv'):
         if path is None:
             raise FileNotFoundError('You must provide path to file')
@@ -72,3 +73,10 @@ class DataCleaner:
             for value in values:
                 if value in row:
                     row[value] = row[value].replace(' ', '')
+
+        floats_field = ['meter_price', 'land_area', 'total_area',
+                        'house_area', 'public_area', 'kitchen_area']
+        for row in self.row:
+            for float_field in floats_field:
+                if float_field in row:
+                    row[float_field] = row[value].replace('.', ',')

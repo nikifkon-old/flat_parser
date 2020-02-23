@@ -7,6 +7,7 @@ from configparser import ConfigParser
 from time import time
 
 from flat_parser.data_modify import binarized
+from flat_parser.data_modify.clean_data import clean
 from flat_parser.sites.avito import GettingAvitoFlatInfo
 from flat_parser.sites.domaekb import GettingHouseInfo
 from flat_parser.sites.google_maps import GoogleMapsParser
@@ -139,6 +140,11 @@ def run_data_mod_from_command_line(name, config):
         binarized.binarized(input_file=input_file,
                             output_file=output_file,
                             variables=var_list)
+
+    if name == 'clean':
+        clean(input_file=input_file,
+              output_file=output_file)
+
     print(f'Output file: {output_file}')
 
 
@@ -160,15 +166,14 @@ def main():
             elif name in ['google_maps']:
                 run_location_parser_from_command_line(name, config)
 
-            elif name in ['binarized']:
+            elif name in ['binarized', 'clean']:
                 run_data_mod_from_command_line(name, config)
 
             else:
                 # Doesnt match parser name
                 logging.error('%s is not a valid parser name', name)
         except NoUrlException as exc:
-            logging.error(
-                '%s url is not found in config file: %s', exc, CONFIG_FILE)
+            print('%s url is not found in config file: %s' % (exc, CONFIG_FILE))
     else:
         print('Please pass parser name')
     print("Time: %s sec." % round(time() - start_time, 2))
