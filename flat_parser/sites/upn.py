@@ -1,6 +1,5 @@
-import logging
-
 from collections import namedtuple
+
 from selenium import webdriver
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.by import By
@@ -9,8 +8,6 @@ from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
 from flat_parser.web_parser.parser import Task
 from flat_parser.data_modify.utils import get_meter_price
-
-
 
 
 class UPNParser(Task):
@@ -22,8 +19,6 @@ class UPNParser(Task):
                                                   'walls', 'sell_conditions',
                                                   'video'])
         self.page_count = page_count or 1
-
-        self.logger = logging.getLogger(__name__)
 
         options = webdriver.ChromeOptions()
         options.add_argument("headless")
@@ -61,7 +56,8 @@ class UPNParser(Task):
                 (By.XPATH, table_xpath)))
             wait.until(EC.invisibility_of_element((By.XPATH, loader_xpath)))
         except (NoSuchElementException, TimeoutException):
-            self.logger.debug('Unable to find table at %s', driver.current_url)
+            self.logger.error('Unable to find table at %s', driver.current_url)
+            # TODO: get screanshot
             return None
         trs = driver.find_elements_by_xpath(
             "//div[@id='panel_search']//table/tbody/tr")
@@ -72,18 +68,22 @@ class UPNParser(Task):
         if 'address' in data and data.get('address') != '':
             data['address'] = data['address'].split(', ')[-1]
         else:
-            self.logger.debug('Cant get address: %s at %s', data['address'], data.get('link'))
+            self.logger.warning('Cant get address: %s at %s',
+                                data['address'], data.get('link'))
             return None
 
         # get areas
         try:
             data['kitchen_area'] = float(data['areas'].split(' / ')[-1])
-        except ValueError:
+        except ValueError as exc:
+            self.logger.warning('Cant get kitchen_area: %s at %s',
+                                data['areas'], data.get('link'), exc_info=exc)
             data['kitchen_area'] = 0
         try:
             data['total_area'] = float(data['areas'].split(' / ')[0])
-        except ValueError:
-            self.logger.debug('Cant get total_area: %s at %s', data['areas'], data.get('link'))
+        except ValueError as exc:
+            self.logger.warning('Cant get total_area: %s at %s',
+                                data['areas'], data.get('link'), exc_info=exc)
             data['total_area'] = 0
 
         data.pop('areas', None)
@@ -92,21 +92,24 @@ class UPNParser(Task):
         if data.get('price') is not None:
             try:
                 data['price'] = int(data['price'].replace('.', ''))
-            except ValueError:
-                self.logger.debug('Cant format price: %s at %s', data['price'], data.get('link'))
+            except ValueError as exc:
+                self.logger.debug('Cant format price: %s at %s',
+                                  data['price'], data.get('link'), exc_info=exc)
                 return None
 
         # get floor
         if data.get('floors') is not None:
             try:
                 data['floor'] = int(data['floors'].split('/')[0].strip())
-            except (ValueError, IndexError):
-                self.logger.debug('Cant format floor: %s at %s', data['floors'], data.get('link'))
+            except (ValueError, IndexError) as exc:
+                self.logger.warning('Cant format floor: %s at %s',
+                                    data['floors'], data.get('link'), exc_info=exc)
                 data['floor'] = None
             try:
                 data['floor_count'] = int(data['floors'].split('/')[1].strip())
-            except (ValueError, IndexError):
-                self.logger.debug('Cant format floor: %s at %s', data['floors'], data.get('link'))
+            except (ValueError, IndexError) as exc:
+                self.logger.warning('Cant format floor: %s at %s',
+                                    data['floors'], data.get('link'), exc_info=exc)
                 data['floor_count'] = None
 
         data.pop('floors')
@@ -132,7 +135,6 @@ class UPNParser(Task):
         # calc meter price
         data['meter_price'] = get_meter_price(data)
         return data
-
 
     def save_data(self, data):
         self.save_list_to_csv(data)

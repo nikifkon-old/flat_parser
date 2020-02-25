@@ -1,10 +1,13 @@
 import csv
 import logging
+import logging.config
 import os
 import sys
 from concurrent.futures import ProcessPoolExecutor
 from configparser import ConfigParser
 from time import time
+
+from selenium.webdriver.remote.remote_connection import LOGGER
 
 from flat_parser.data_modify import binarized
 from flat_parser.data_modify.clean_data import clean
@@ -13,7 +16,11 @@ from flat_parser.sites.domaekb import DomaekbParser
 from flat_parser.sites.google_maps import GoogleMapsParser
 from flat_parser.sites.youla import YoulaParser
 from flat_parser.sites.upn import UPNParser
+from flat_parser.utils.log import LOGGING_CONFIG
 
+
+LOGGER.setLevel(logging.WARNING)
+logging.config.dictConfig(LOGGING_CONFIG)
 
 CONFIG_FILE = "config.ini"
 
@@ -61,12 +68,12 @@ def run_flat_parser_from_command_line(name, config):
         task = AvitoParser("avito_parser", url, output_file=output_file,
                            scroll_count=scroll_count)
         task.run()
-    elif name == 'jula':
-        url = config['jula'].get('url')
-        scroll_count = int(config['jula'].get('scroll_count'))
+    elif name == 'youla':
+        url = config['youla'].get('url')
+        scroll_count = int(config['youla'].get('scroll_count'))
         if url is None:
             raise NoUrlException(name)
-        task = YoulaParser("jula", url,
+        task = YoulaParser("youla", url,
                            output_file=output_file,
                            scroll_count=scroll_count)
         task.run()
@@ -150,14 +157,13 @@ def run_data_mod_from_command_line(name, config):
 
 def main():
     start_time = time()
-    logging.basicConfig(filename='data/main.log', level=logging.DEBUG)
     config = read_config(CONFIG_FILE)
 
     if len(sys.argv) >= 2:
         name = sys.argv[1]
 
         try:
-            if name in ['avito', 'jula', 'upn']:
+            if name in ['avito', 'youla', 'upn']:
                 run_flat_parser_from_command_line(name, config)
 
             elif name in ['domaekb']:
@@ -171,7 +177,7 @@ def main():
 
             else:
                 # Doesnt match parser name
-                logging.error('%s is not a valid parser name', name)
+                print('%s is not a valid parser name' % name)
         except NoUrlException as exc:
             print('%s url is not found in config file: %s' %
                   (exc, CONFIG_FILE))

@@ -1,5 +1,6 @@
 import os
 import re
+
 from concurrent.futures import ProcessPoolExecutor
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
@@ -7,6 +8,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
+
 from flat_parser.web_parser.parser import Task, StopTaskException
 from flat_parser.data_modify.utils import get_meter_price
 
@@ -63,8 +65,6 @@ class YoulaParser(Task):
 
 
 class YoulaItemParser(Task):
-    debug_file = "data/jula_debug.log"
-
     def __init__(self, *args, **kwargs):
         options = webdriver.ChromeOptions()
         options.add_argument("headless")
@@ -87,9 +87,8 @@ class YoulaItemParser(Task):
             dl_element = driver.find_element_by_xpath(dl_xpath)
             load_more_btn = dl_element.find_element_by_xpath("./dd[last()]/button")
             load_more_btn.click()
-        except (NoSuchElementException, TimeoutException):
-            with open(self.debug_file, 'a', encoding='utf-8') as file:
-                file.write(f'Unable to find decription at {self.url}')
+        except (NoSuchElementException, TimeoutException) as exc:
+            self.logger.error('Unable to find data section at %s', self.url, exc_info=exc)
             raise StopTaskException()
 
     def get_price(self, driver):
@@ -127,9 +126,8 @@ class YoulaItemParser(Task):
     def get_dd_by_dt_text(self, dl_element, text):
         try:
             return dl_element.find_element_by_xpath(f".//dt[.='{text}']/following-sibling::dd").text
-        except NoSuchElementException:
-            with open(self.debug_file, 'a', encoding='utf-8') as file:
-                file.write(f'Unable to find {text} in {self.url}\n')
+        except NoSuchElementException as exc:
+            self.logger.warning('Unable to find %s in %s', text, self.url, exc_info=exc)
             return None
 
     def clean_data(self, data):

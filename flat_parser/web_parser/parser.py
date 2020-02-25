@@ -1,9 +1,16 @@
 import csv
+import logging
+import logging.config
 import os
-import signal
 from random import choice
 
 from selenium import webdriver
+
+from flat_parser.utils.log import LOGGING_CONFIG
+
+
+# need for enable logging config in multiprocess
+logging.config.dictConfig(LOGGING_CONFIG)
 
 
 class StopTaskException(Exception):
@@ -27,7 +34,6 @@ class Driver(webdriver.Chrome):
         with open(self.useragent_list_path, 'r') as file:
             ua_list = file.read().splitlines()
             return choice(ua_list)
-
 
 class Task():
     _drivers = {}
@@ -54,6 +60,8 @@ class Task():
 
         self.prev_data = prev_data
         self._driver_options = driver_options
+
+        self.logger = logging.getLogger(__name__)
 
     @classmethod
     def create_tasks_with_prev_data(cls, *args, prev_data=None, **kwargs):
@@ -110,21 +118,24 @@ class Task():
         raise NotImplementedError('save_data method must be overrided')
 
     def save_list_to_csv(self, data):
-        for row in data:
-            self.save_data_to_csv(row)
+        if data:
+            for row in data:
+                self.save_data_to_csv(row)
 
     def save_data_to_csv(self, data):
-        self.data = data
-        need_header = False
-        if not os.path.exists(self.output_file):
-            need_header = True
-        with open(self.output_file, 'a', encoding='utf-8') as file:
-            writer = csv.writer(file)
-            if need_header:
-                writer.writerow(data.keys())
-            writer.writerow(data.values())
+        if data:
+            self.data = data # BUG: when save from list
+            need_header = False
+            if not os.path.exists(self.output_file):
+                need_header = True
+            with open(self.output_file, 'a', encoding='utf-8') as file:
+                writer = csv.writer(file)
+                if need_header:
+                    writer.writerow(data.keys())
+                writer.writerow(data.values())
 
     def run(self):
+        self.logger.debug('Start: %r', self)
         self.status = "running"
         driver, _ = self.open_driver()
         driver.get(self.url)
@@ -135,11 +146,12 @@ class Task():
             returned_data = self.save_data(full_data)
             self.status = "successed"
             return returned_data
-        except StopTaskException:
+        except StopTaskException as exc:
             self.status = "failed"
+            self.logger.error('Failed: %r', self, exc_info=exc)
         finally:
-            print(f"{repr(self)} finished")
             self.close_driver(driver)
+            self.logger.debug('Finished: %r', self)
 
     def __repr__(self):
         return "<%s: name=%s, url=%s, status=%s>" % (

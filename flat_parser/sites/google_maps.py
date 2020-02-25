@@ -89,7 +89,7 @@ class GoogleMapsParser(Task):
         return data
 
     def get_post_office_time(self, driver):
-        wait = WebDriverWait(driver, 5)
+        wait = WebDriverWait(driver, 10)
 
         input_xpath = "//div[@id='directions-searchbox-1']//input"
         wait.until(EC.presence_of_element_located((By.XPATH, input_xpath)))
@@ -97,10 +97,10 @@ class GoogleMapsParser(Task):
         input_.send_keys(self.main_post_office_address.lower())
         input_.send_keys(Keys.RETURN)
 
-        public_transport_btn_xpath = "//div[@aria-label='На общественном транспорте']/.."
-        public_transport_btn = driver.find_element_by_xpath(
-            public_transport_btn_xpath)
-        public_transport_btn.click()
+        switch_to_feet_btn_xpath = "//div[@aria-label='Пешком']/.."
+        switch_to_auto_btn = driver.find_element_by_xpath(
+            switch_to_feet_btn_xpath)
+        switch_to_auto_btn.click()
 
         # get_few_time
         few_time_xpath = (f"//div[@id='section-directions-trip-0']"
