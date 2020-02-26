@@ -1,13 +1,9 @@
 import csv
-import logging
-import logging.config
 import os
 import sys
 from concurrent.futures import ProcessPoolExecutor
 from configparser import ConfigParser
 from time import time
-
-from selenium.webdriver.remote.remote_connection import LOGGER
 
 from flat_parser.data_modify import binarized
 from flat_parser.data_modify.clean_data import clean
@@ -16,11 +12,7 @@ from flat_parser.sites.domaekb import DomaekbParser
 from flat_parser.sites.google_maps import GoogleMapsParser
 from flat_parser.sites.youla import YoulaParser
 from flat_parser.sites.upn import UPNParser
-from flat_parser.utils.log import LOGGING_CONFIG
 
-
-LOGGER.setLevel(logging.WARNING)
-logging.config.dictConfig(LOGGING_CONFIG)
 
 CONFIG_FILE = "config.ini"
 

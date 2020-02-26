@@ -1,16 +1,9 @@
 import csv
 import logging
-import logging.config
 import os
 from random import choice
 
 from selenium import webdriver
-
-from flat_parser.utils.log import LOGGING_CONFIG
-
-
-# need for enable logging config in multiprocess
-logging.config.dictConfig(LOGGING_CONFIG)
 
 
 class StopTaskException(Exception):
