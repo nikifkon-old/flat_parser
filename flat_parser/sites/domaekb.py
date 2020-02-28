@@ -8,7 +8,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
 from flat_parser.web_parser.parser import StopTaskException, Task
-from flat_parser.utils.normolize import normolize_address_for_domaekb
+from flat_parser.utils.data import normolize_address_for_domaekb
 
 
 NBSP = " "
@@ -40,7 +40,8 @@ class DomaekbParser(Task):
     @classmethod
     def create_tasks_from_addresses(cls, prev_datas, **kwargs):
         for prev_data in prev_datas:
-            yield cls.create_task_from_address(prev_data, **kwargs)
+            if prev_data is not None:
+                yield cls.create_task_from_address(prev_data, **kwargs)
 
     def prepare(self, driver):
         wait = WebDriverWait(driver, 10)

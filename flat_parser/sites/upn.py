@@ -7,7 +7,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
 from flat_parser.web_parser.parser import Task
-from flat_parser.data_modify.utils import get_meter_price
+from flat_parser.utils.data import get_meter_price
 
 
 class UPNParser(Task):

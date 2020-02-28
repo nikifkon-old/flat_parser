@@ -10,7 +10,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
 from flat_parser.web_parser.parser import Task, StopTaskException
-from flat_parser.data_modify.utils import get_meter_price
+from flat_parser.utils.data import get_meter_price
+from flat_parser.utils.log import setup_logging
+
 
 
 def run_task(task):
@@ -57,6 +59,7 @@ class YoulaParser(Task):
     def parse_items(self, links):
         tasks = [YoulaItemParser("youla_item", link) for link in links]
         with ProcessPoolExecutor(os.cpu_count()) as executor:
+            setup_logging()
             result = executor.map(run_task, tasks)
         return result
 

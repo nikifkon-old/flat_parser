@@ -9,7 +9,7 @@ from selenium.common.exceptions import (
 )
 
 from flat_parser.web_parser.parser import Task, StopTaskException
-from flat_parser.data_modify.utils import get_time_in_minutes_by_text
+from flat_parser.utils.data import get_time_in_minutes_by_text
 
 
 class GoogleMapsParser(Task):

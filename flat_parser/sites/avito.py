@@ -6,14 +6,14 @@ from time import sleep
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 
-from flat_parser.data_modify.utils import get_meter_price
+from flat_parser.utils.data import get_meter_price
 from flat_parser.web_parser.parser import Task
+from flat_parser.utils.log import setup_logging
 
 
 class AvitoParser(Task):
     """ Get list of items urls for parse """
-    scroll_sleep_time = 0.4
-    debug_file = "data/flat_info_debug.log"
+    scroll_sleep_time = 0.5
 
     def __init__(self, *args, scroll_count=None, **kwargs):
         options = webdriver.ChromeOptions()
@@ -60,6 +60,7 @@ class AvitoParser(Task):
     def run_multi_proccess(self, func, args):
         result = []
         with ProcessPoolExecutor(os.cpu_count()) as executor:
+            setup_logging()
             result = executor.map(func, args)
         return result
 
@@ -71,7 +72,7 @@ class AvitoParser(Task):
         return row
 
     def parse_string(self, string):
-        price_mo = re.compile(r'(?P<price>(\d+ ?)+).руб\.')
+        price_mo = re.compile(r'(?P<price>(\d+ ?)+).₽')
         total_area_mo = re.compile(r'(?P<area>\d+(\.)?\d) м²')
         floor_mo = re.compile(r'(?P<floor>\d+)\/(?P<floor_num>\d+) эт.')
 
@@ -89,15 +90,13 @@ class AvitoParser(Task):
         if floor_num is not None:
             floor_num = floor_num.group('floor_num')
 
-        address = self.get_address(string)
-
         row = {
             "price": price,
-            "address": address,
             "total_area": total_area,
             "floor": floor,
             "floor_num": floor_num,
         }
+        row["address"] = self.get_address(string)
         return row
 
     def get_address(self, item):
@@ -111,14 +110,14 @@ class AvitoParser(Task):
 
         address = re.search(address_mo, item)
         if address is None:
+            self.logger.warning('Item string: %s dont match address re', item)
             try:
                 address = item.split('\n')[-2]
+                self.logger.warning('Setting address to %s', address)
             except KeyError:
                 address = None
-            with open(self.debug_file, 'a', encoding='utf-8') as file:
-                file.write(('[Warning] Address dont match re.'
-                            'We set address to `%s`,'
-                            'text: %s \n') % (address, item))
+                self.logger.error('Item string: %s dont container enouth \\n section'
+                                  'to auto set address', item)
         else:
             address = address.group()
             if '\n' in address:
