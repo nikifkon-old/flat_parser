@@ -1,9 +1,8 @@
 import logging
-import logging.config
 
 from selenium.webdriver.remote.remote_connection import LOGGER
 
-from flat_parser.utils.log import LOGGING_CONFIG
+from flat_parser.utils.log import setup_logging
 
-logging.config.dictConfig(LOGGING_CONFIG)
+setup_logging()
 LOGGER.setLevel(logging.WARNING) # don't work

@@ -1,8 +1,11 @@
 import logging
-import logging.config
+
+import pytest
+
+from flat_parser.utils.log import setup_logging
 
 
-LOGGING_CONFIG = {
+TEST_LOGGING_CONFIG = {
     'version': 1,
     'disable_existing_loggers': True,
     'formatters': {
@@ -13,6 +16,10 @@ LOGGING_CONFIG = {
         'verbose': {
             'class': 'logging.Formatter',
             'format': '[%(levelname)s:%(name)s]: %(message)s'
+        },
+        'test': {
+            'class': 'logging.Formatter',
+            'format': '%(message)s'
         }
     },
     'handlers': {
@@ -24,8 +31,9 @@ LOGGING_CONFIG = {
         'file': {
             'level': 'WARNING',
             'class': 'flat_parser.utils.log.FileHandlerUTFEncoding',
-            'filename': 'flat_parser.log',
-            'formatter': 'verbose'
+            'filename': 'flat_parser/tests/flat_parser.log',
+            'formatter': 'test',
+            'mode': 'w'
         }
     },
     'root': {
@@ -35,12 +43,7 @@ LOGGING_CONFIG = {
 }
 
 
-class FileHandlerUTFEncoding(logging.FileHandler):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, encoding='utf-8', **kwargs)
-
-
-def setup_logging(config=None):
-    if config is None:
-        config = LOGGING_CONFIG
-    logging.config.dictConfig(config)
+@pytest.fixture
+def logger():
+    setup_logging(config=TEST_LOGGING_CONFIG)
+    return logging.getLogger()
