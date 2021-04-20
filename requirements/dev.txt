@@ -41,7 +41,7 @@ pickleshare==0.7.5
 pluggy==0.13.0
 prometheus-client==0.7.1
 prompt-toolkit==2.0.10
-py==1.8.1
+py==1.10.0
 pycodestyle==2.5.0
 pydocstyle==4.0.1
 pyflakes==2.1.1
